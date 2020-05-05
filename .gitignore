@@ -56,3 +56,4 @@ monodroid*.msi
 *.cachefile
 *.dll
 /.vs
+/Hydra/.vs/Hydra/v15/Server/sqlite3
