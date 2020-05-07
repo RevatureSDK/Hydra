@@ -13,11 +13,7 @@ namespace Hydra
         SpriteBatch spriteBatch;
 
         private Texture2D background;
-        //private Texture2D shuttle;
-        //private Texture2D earth;
-        private AnimatedSprite animatedSprite;
-        private InputHelper inputHelper;
-        private Vector2 playerPosition;
+        private Player player;
 
         public Game1()
         {
@@ -36,7 +32,8 @@ namespace Hydra
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            //inputHelper = new InputHelper();
+            //player = new Player(inputHelper);
             base.Initialize();
         }
 
@@ -49,14 +46,12 @@ namespace Hydra
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            inputHelper = new InputHelper();
-
-            playerPosition = new Vector2(400, 200);
+            //playerPosition = new Vector2(400, 200);
 
             // TODO: use this.Content to load your game content here
             background = Content.Load<Texture2D>("images/stars"); // change these names to the names of your images
             Texture2D texture = Content.Load<Texture2D>("images/sprite_hydra0");
-            animatedSprite = new AnimatedSprite(texture, 1, 1);
+            player = new Player(texture, 1, 1);
             //shuttle = Content.Load<Texture2D>("images/shuttle");  // if you are using your own images.
             //earth = Content.Load<Texture2D>("images/earth");
         }
@@ -77,48 +72,9 @@ namespace Hydra
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            inputHelper.Update();
-
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (inputHelper.IsKeyDown(Keys.Right) || inputHelper.IsKeyDown(Keys.D))
-            {
-                if (playerPosition.X <= this.Window.ClientBounds.Width)
-                {
-                    playerPosition.X += 2;
-                }
-
-            }
-
-            if (inputHelper.IsKeyDown(Keys.Left) || inputHelper.IsKeyDown(Keys.A))
-            {
-                if (playerPosition.X >= 0)
-                {
-                    playerPosition.X -= 2;
-                }
-
-            }
-
-            if (inputHelper.IsKeyDown(Keys.Down) || inputHelper.IsKeyDown(Keys.S))
-            {
-                if (playerPosition.Y <= this.Window.ClientBounds.Height)
-                {
-                    playerPosition.Y += 2;
-                }
-            }
-
-            if (inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.W))
-            {
-                if (playerPosition.Y >= 0)
-                {
-                    playerPosition.Y -= 2;
-                }
-            }
-
-
             // TODO: Add your update logic here
-            animatedSprite.Update();
+            //inputHelper.Update();
+            player.Update(graphics.PreferredBackBufferHeight, graphics.PreferredBackBufferWidth);
 
             base.Update(gameTime);
         }
@@ -129,7 +85,7 @@ namespace Hydra
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
@@ -139,7 +95,7 @@ namespace Hydra
             //spriteBatch.Draw(shuttle, new Vector2(450, 240), Color.White);
             spriteBatch.End();
 
-            animatedSprite.Draw(spriteBatch, playerPosition);
+            player.Draw(spriteBatch, player.playerPosition);
 
             base.Draw(gameTime);
         }
