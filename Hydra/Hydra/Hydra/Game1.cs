@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Hydra;
 
 namespace Hydra
 {
@@ -84,20 +85,20 @@ namespace Hydra
 
             if (inputHelper.IsKeyDown(Keys.Right) || inputHelper.IsKeyDown(Keys.D))
             {
-                if (playerPosition.X <= this.Window.ClientBounds.Width)
+                if(playerPosition.X <= this.Window.ClientBounds.Width)
                 {
                     playerPosition.X += 2;
                 }
-
+                
             }
 
             if (inputHelper.IsKeyDown(Keys.Left) || inputHelper.IsKeyDown(Keys.A))
             {
-                if (playerPosition.X >= 0)
+                if(playerPosition.X >= 0)
                 {
                     playerPosition.X -= 2;
                 }
-
+                
             }
 
             if (inputHelper.IsKeyDown(Keys.Down) || inputHelper.IsKeyDown(Keys.S))
@@ -110,7 +111,7 @@ namespace Hydra
 
             if (inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.W))
             {
-                if (playerPosition.Y >= 0)
+                if(playerPosition.Y >= 0)
                 {
                     playerPosition.Y -= 2;
                 }
@@ -140,7 +141,7 @@ namespace Hydra
             spriteBatch.End();
 
             animatedSprite.Draw(spriteBatch, playerPosition);
-
+            
             base.Draw(gameTime);
         }
     }
