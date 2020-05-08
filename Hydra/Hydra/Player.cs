@@ -8,73 +8,135 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Hydra
 {
-    public class Player
+    public class Player : Object2D
     {
-        public Texture2D Texture { get; set; }
         public int Rows { get; set; }
         public int Columns { get; set; }
         private int currentFrame;
         private int totalFrames;
         private InputHelper inputHelper;
-        public Vector2 playerPosition;
         private const int  STARTING_POSITIONX = 400;
         private const int  STARTING_POSITIONY = 200;
+        private const int INITIAL_SPEED = 4;
+        private State currentState;
+        private int totalFps = 0;
+        private Texture2D TextureLeft;
+        private Texture2D TextureRight;
+        private bool hasJumped;
+        private int Acceleration;
+        private float test;
 
-        public Player(Texture2D texture, int rows, int columns)
+        public Player(Texture2D textureLeft, Texture2D textureRight, int rows, int columns)
         {
-            Texture = texture;
+            Texture = textureRight;
+            TextureLeft = textureLeft;
+            TextureRight = textureRight;
             Rows = rows;
             Columns = columns;
             currentFrame = 0;
             totalFrames = Rows * Columns;
             inputHelper = new InputHelper();
-            playerPosition = new Vector2(STARTING_POSITIONX, STARTING_POSITIONY);
+            //currentState = Idle;
+            Speed = INITIAL_SPEED;
+            Position = new Vector2(STARTING_POSITIONX, STARTING_POSITIONY);
+            Velocity = new Vector2(0, 0);
+            hasJumped = true;
+            test = 1f;
         }
 
-        public void Update(int WindowHeight, int WindowWidth)
+        enum State
         {
+            Idle,
+            Walking,
+            Jumping
+        }
+
+        public override void Update()
+        {
+            int width = Texture.Width / Columns;
+            int height = Texture.Height / Rows;
+            BoundingBox = new Rectangle((int)Position.X + 20, (int)Position.Y, width - 40, height - 5);
+        }
+
+        public void Update(int WindowHeight, int WindowWidth, List<Object2D> objects)
+        {
+            this.Update();
             inputHelper.Update();
+            Move(WindowHeight, WindowWidth);
 
-            if (inputHelper.IsKeyDown(Keys.Right) || inputHelper.IsKeyDown(Keys.D))
+            foreach (var obj in objects)
             {
-                if (playerPosition.X <= WindowWidth)
+                if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) || 
+                    (Velocity.X < 0 && this.IsTouchingRight(obj)))
                 {
-                    playerPosition.X += 2;
+                    Velocity.X = 0;
                 }
 
-            }
-
-            if (inputHelper.IsKeyDown(Keys.Left) || inputHelper.IsKeyDown(Keys.A))
-            {
-                if (playerPosition.X >= 0)
+                if ((Velocity.Y > 0 && this.IsTouchingBottom(obj)) ||
+                    (Velocity.Y < 0 && this.IsTouchingTop(obj)))
                 {
-                    playerPosition.X -= 2;
-                }
+                    if (this.IsTouchingBottom(obj))
+                    {
+                        hasJumped = false;
+                    }
+
+                    Velocity.Y = 0;
+                }                
             }
 
-            if (inputHelper.IsKeyDown(Keys.Down) || inputHelper.IsKeyDown(Keys.S))
+            Position += Velocity;
+            Velocity = Vector2.Zero;
+
+            totalFps++;
+            if(totalFps % 10 == 0)
             {
-                if (playerPosition.Y <= WindowHeight)
-                {
-                    playerPosition.Y += 2;
-                }
+                currentFrame++;
             }
-
-            if (inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.W))
-            {
-                if (playerPosition.Y >= 0)
-                {
-                    playerPosition.Y -= 2;
-                }
-            }
-
-             
-            currentFrame++;
             if (currentFrame == totalFrames)
                 currentFrame = 0;
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 location)
+        private void Move(int WindowHeight, int WindowWidth)
+        {
+            if (inputHelper.IsKeyDown(Keys.Right) || inputHelper.IsKeyDown(Keys.D))
+            {
+                Texture = TextureRight;              
+                if (Position.X <= WindowWidth - Texture.Width)
+                {
+                    Velocity.X = Speed;
+                }
+            }
+
+            if (inputHelper.IsKeyDown(Keys.Left) || inputHelper.IsKeyDown(Keys.A))
+            {
+                Texture = TextureLeft;
+                if (Position.X >= 0)
+                {
+                    Velocity.X = -Speed;
+                }
+            }
+
+            if ((inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.Space) || inputHelper.IsKeyDown(Keys.W)) && hasJumped == false)
+            {
+                if (Position.Y >= 0)
+                {
+                    Velocity.Y = -50;
+                    hasJumped = true;
+                }
+            }
+
+            if (hasJumped == true)
+            {
+                Velocity.Y += 4;
+            }
+
+            if (hasJumped == false)
+            {
+                Velocity.Y = 0;
+            }
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
         {
             int width = Texture.Width / Columns;
             int height = Texture.Height / Rows;
@@ -82,7 +144,7 @@ namespace Hydra
             int column = currentFrame % Columns;
 
             Rectangle sourceRectangle = new Rectangle(width * column, height * row, width, height);
-            Rectangle destinationRectangle = new Rectangle((int)location.X, (int)location.Y, width, height);
+            Rectangle destinationRectangle = new Rectangle((int)Position.X, (int)Position.Y, width, height);
 
             spriteBatch.Begin();
             spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White);

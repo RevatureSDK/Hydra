@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Hydra
 {
@@ -14,12 +15,15 @@ namespace Hydra
 
         private Texture2D background;
         private Player player;
+        private Tile tile;
+        private Tile floor;
+        private List<Object2D> objects = new List<Object2D>();
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferHeight = 480;
             graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferredBackBufferHeight = 600;
             Content.RootDirectory = "Content";
         }
 
@@ -43,15 +47,19 @@ namespace Hydra
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            //playerPosition = new Vector2(400, 200);
-
-            // TODO: use this.Content to load your game content here
+            //background = Content.Load<Texture2D>("images/bulkhead-wallsx3"); // change these names to the names of your images
             background = Content.Load<Texture2D>("images/stars"); // change these names to the names of your images
-            Texture2D texture = Content.Load<Texture2D>("images/sprite_hydra0");
-            player = new Player(texture, 1, 1);
+            Texture2D texturePlayerLeft = Content.Load<Texture2D>("images/HydraLeft_v1.2");
+            Texture2D texturePlayerRight = Content.Load<Texture2D>("images/HydraRight_v1.2");
+            Texture2D textureTile = Content.Load<Texture2D>("images/blockA1");
+            Texture2D textureFloor = Content.Load<Texture2D>("images/sprite_floor0.11");
+            player = new Player(texturePlayerLeft, texturePlayerRight, 2, 1);
+            tile = new Tile(textureTile, 600, 400);
+            floor = new Tile(textureFloor, 0, 540);
+            objects.Add(tile);
+            objects.Add(floor);
             //shuttle = Content.Load<Texture2D>("images/shuttle");  // if you are using your own images.
             //earth = Content.Load<Texture2D>("images/earth");
         }
@@ -74,8 +82,13 @@ namespace Hydra
         {
             // TODO: Add your update logic here
             //inputHelper.Update();
-            player.Update(graphics.PreferredBackBufferHeight, graphics.PreferredBackBufferWidth);
+            player.Update(graphics.PreferredBackBufferHeight, graphics.PreferredBackBufferWidth, objects);
 
+            //currentFrame++;
+            //if (currentFrame >= fps) 
+            //{
+            //    currentFrame = 0;
+            //}                                    
             base.Update(gameTime);
         }
 
@@ -91,11 +104,11 @@ namespace Hydra
             spriteBatch.Begin();
 
             spriteBatch.Draw(background, new Rectangle(0, 0, this.Window.ClientBounds.Width, this.Window.ClientBounds.Height), Color.White);
-            //spriteBatch.Draw(earth, new Vector2(400, 240), Color.White);
-            //spriteBatch.Draw(shuttle, new Vector2(450, 240), Color.White);
             spriteBatch.End();
-
-            player.Draw(spriteBatch, player.playerPosition);
+            
+            tile.Draw(spriteBatch);
+            floor.Draw(spriteBatch);
+            player.Draw(spriteBatch);
 
             base.Draw(gameTime);
         }
