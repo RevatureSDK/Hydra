@@ -16,7 +16,7 @@ namespace Hydra
         private int totalFrames;
         private InputHelper inputHelper;
         private const int  STARTING_POSITIONX = 400;
-        private const int  STARTING_POSITIONY = 200;
+        private const int  STARTING_POSITIONY = 207;
         private const int INITIAL_SPEED = 4;
         private State currentState;
         private int totalFps = 0;
@@ -41,7 +41,7 @@ namespace Hydra
             Position = new Vector2(STARTING_POSITIONX, STARTING_POSITIONY);
             Velocity = new Vector2(0, 0);
             hasJumped = true;
-            test = 1f;
+            test = 0.1f;
         }
 
         enum State
@@ -85,7 +85,7 @@ namespace Hydra
             }
 
             Position += Velocity;
-            Velocity = Vector2.Zero;
+            Velocity.X = 0;
 
             totalFps++;
             if(totalFps % 10 == 0)
@@ -120,19 +120,14 @@ namespace Hydra
             {
                 if (Position.Y >= 0)
                 {
-                    Velocity.Y = -50;
+                    Velocity.Y = -9;                
                     hasJumped = true;
                 }
             }
 
             if (hasJumped == true)
             {
-                Velocity.Y += 4;
-            }
-
-            if (hasJumped == false)
-            {
-                Velocity.Y = 0;
+                Velocity.Y += 0.5f;
             }
         }
 
