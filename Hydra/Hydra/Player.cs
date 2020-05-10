@@ -64,25 +64,7 @@ namespace Hydra
             inputHelper.Update();
             Move(WindowHeight, WindowWidth);
 
-            foreach (var obj in objects)
-            {
-                if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) || 
-                    (Velocity.X < 0 && this.IsTouchingRight(obj)))
-                {
-                    Velocity.X = 0;
-                }
-
-                if ((Velocity.Y > 0 && this.IsTouchingBottom(obj)) ||
-                    (Velocity.Y < 0 && this.IsTouchingTop(obj)))
-                {
-                    if (this.IsTouchingBottom(obj))
-                    {
-                        hasJumped = false;
-                    }
-
-                    Velocity.Y = 0;
-                }                
-            }
+            hasJumped = CheckCollision(this, objects);
 
             Position += Velocity;
             Velocity.X = 0;
@@ -94,6 +76,42 @@ namespace Hydra
             }
             if (currentFrame == totalFrames)
                 currentFrame = 0;
+        }
+
+        private bool CheckCollision(Object2D player, List<Object2D> objects)
+        {
+            bool jump = false;
+            bool floor = true;
+            foreach (var obj in objects)
+            {
+                if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
+                    (Velocity.X < 0 && this.IsTouchingRight(obj)))
+                {
+                    Velocity.X = 0;
+                }
+
+                if ((Velocity.Y >= 0 && this.IsTouchingBottom(obj)) ||
+                    (Velocity.Y <= 0 && this.IsTouchingTop(obj)))
+                {
+                    if (this.IsTouchingBottom(obj))
+                    {
+                        floor = false;
+                    }
+
+                    Velocity.Y = 0;
+                }
+
+                if (!this.IsTouchingBottom(obj))
+                {
+                    jump = true;
+                }
+            }
+            if (floor == false)
+            {
+                return floor;
+            }
+            else
+                return jump;
         }
 
         private void Move(int WindowHeight, int WindowWidth)
@@ -120,7 +138,7 @@ namespace Hydra
             {
                 if (Position.Y >= 0)
                 {
-                    Velocity.Y = -9;                
+                    Velocity.Y = -14;                
                     hasJumped = true;
                 }
             }

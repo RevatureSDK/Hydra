@@ -16,6 +16,7 @@ namespace Hydra
         private Texture2D background;
         private Player player;
         private Tile tile;
+        private List<Tile> tiles = new List<Tile>();
         private Tile floor;
         private List<Object2D> objects = new List<Object2D>();
 
@@ -56,9 +57,14 @@ namespace Hydra
             Texture2D textureTile = Content.Load<Texture2D>("images/blockA1");
             Texture2D textureFloor = Content.Load<Texture2D>("images/sprite_floor0.11");
             player = new Player(texturePlayerLeft, texturePlayerRight, 2, 1);
-            tile = new Tile(textureTile, 600, 400);
+            tiles.Add(new Tile(textureTile, 600, 400));
+            tiles.Add(new Tile(textureTile, 600, 200));
             floor = new Tile(textureFloor, 0, 540);
-            objects.Add(tile);
+            foreach(var tile in tiles)
+            {
+                objects.Add(tile);
+            }
+            //objects.Add(tile);
             objects.Add(floor);
             //shuttle = Content.Load<Texture2D>("images/shuttle");  // if you are using your own images.
             //earth = Content.Load<Texture2D>("images/earth");
@@ -106,7 +112,11 @@ namespace Hydra
             spriteBatch.Draw(background, new Rectangle(0, 0, this.Window.ClientBounds.Width, this.Window.ClientBounds.Height), Color.White);
             spriteBatch.End();
             
-            tile.Draw(spriteBatch);
+            foreach(var tile in tiles)
+            {
+                tile.Draw(spriteBatch);
+            }
+            //tile.Draw(spriteBatch);
             floor.Draw(spriteBatch);
             player.Draw(spriteBatch);
 
