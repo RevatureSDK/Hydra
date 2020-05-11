@@ -42,7 +42,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Game1.cs" />
+    <Compile Include="Background.cs" />
+    <Compile Include="HydraGame.cs" />
     <Compile Include="InputHelper.cs" />
     <Compile Include="Object2D.cs" />
     <Compile Include="Player.cs" />

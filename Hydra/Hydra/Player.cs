@@ -15,22 +15,26 @@ namespace Hydra
         private int currentFrame;
         private int totalFrames;
         private InputHelper inputHelper;
-        private const int  STARTING_POSITIONX = 400;
-        private const int  STARTING_POSITIONY = 207;
+        private const int  STARTING_POSITIONX = 200;
+        private const int  STARTING_POSITIONY = 200;
         private const int INITIAL_SPEED = 4;
         private State currentState;
         private int totalFps = 0;
-        private Texture2D TextureLeft;
-        private Texture2D TextureRight;
+        private Texture2D TextureLI;
+        private Texture2D TextureRI;
+        private Texture2D TextureLW;
+        private Texture2D TextureRW;
         private bool hasJumped;
         private int Acceleration;
         private float test;
 
-        public Player(Texture2D textureLeft, Texture2D textureRight, int rows, int columns)
+        public Player(Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
-            Texture = textureRight;
-            TextureLeft = textureLeft;
-            TextureRight = textureRight;
+            Texture = textureRI;
+            TextureLI = textureLI;
+            TextureRI = textureRI;
+            TextureLW = textureLW;
+            TextureRW = textureRW;
             Rows = rows;
             Columns = columns;
             currentFrame = 0;
@@ -42,6 +46,7 @@ namespace Hydra
             Velocity = new Vector2(0, 0);
             hasJumped = true;
             test = 0.1f;
+            currentState = State.Idle;
         }
 
         enum State
@@ -58,11 +63,36 @@ namespace Hydra
             BoundingBox = new Rectangle((int)Position.X + 20, (int)Position.Y, width - 40, height - 5);
         }
 
-        public void Update(int WindowHeight, int WindowWidth, List<Object2D> objects)
+        public void Update(int WindowWidth, int WindowHeight, List<Object2D> objects)
         {
+
             this.Update();
+
             inputHelper.Update();
             Move(WindowHeight, WindowWidth);
+
+            if (Velocity.X == 0)
+            {
+                currentState = State.Idle;
+            }
+
+            if (Velocity.X > 0 && currentState == State.Walking)
+            {
+                Texture = TextureRW;
+            }
+             else if (Velocity.X < 0 && currentState == State.Walking)
+            {
+                Texture = TextureLW;
+            }
+            
+            if (currentState == State.Idle && Texture == TextureLW)
+            {
+                Texture = TextureLI;
+            }
+            else if (currentState == State.Idle && Texture == TextureRW)
+            {
+                Texture = TextureRI;
+            }
 
             hasJumped = CheckCollision(this, objects);
 
@@ -77,6 +107,8 @@ namespace Hydra
             if (currentFrame == totalFrames)
                 currentFrame = 0;
         }
+
+
 
         private bool CheckCollision(Object2D player, List<Object2D> objects)
         {
@@ -106,28 +138,31 @@ namespace Hydra
                     jump = true;
                 }
             }
+
             if (floor == false)
             {
                 return floor;
             }
             else
+            {
                 return jump;
+            }
         }
 
         private void Move(int WindowHeight, int WindowWidth)
         {
             if (inputHelper.IsKeyDown(Keys.Right) || inputHelper.IsKeyDown(Keys.D))
             {
-                Texture = TextureRight;              
+                currentState = State.Walking;          
                 if (Position.X <= WindowWidth - Texture.Width)
                 {
-                    Velocity.X = Speed;
+                    Velocity.X = Speed;                  
                 }
             }
 
             if (inputHelper.IsKeyDown(Keys.Left) || inputHelper.IsKeyDown(Keys.A))
             {
-                Texture = TextureLeft;
+                currentState = State.Walking;
                 if (Position.X >= 0)
                 {
                     Velocity.X = -Speed;
@@ -136,6 +171,7 @@ namespace Hydra
 
             if ((inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.Space) || inputHelper.IsKeyDown(Keys.W)) && hasJumped == false)
             {
+                // currentState = State.Jumping;
                 if (Position.Y >= 0)
                 {
                     Velocity.Y = -14;                
