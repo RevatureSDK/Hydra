@@ -25,8 +25,7 @@ namespace Hydra
         private Texture2D TextureLW;
         private Texture2D TextureRW;
         private bool hasJumped;
-        private int Acceleration;
-        private float test;
+        public int currentLvl = 1;
 
         public Player(Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
@@ -40,12 +39,10 @@ namespace Hydra
             currentFrame = 0;
             totalFrames = Rows * Columns;
             inputHelper = new InputHelper();
-            //currentState = Idle;
             Speed = INITIAL_SPEED;
             Position = new Vector2(STARTING_POSITIONX, STARTING_POSITIONY);
             Velocity = new Vector2(0, 0);
             hasJumped = true;
-            test = 0.1f;
             currentState = State.Idle;
         }
 
@@ -65,9 +62,7 @@ namespace Hydra
 
         public void Update(int WindowWidth, int WindowHeight, List<Object2D> objects)
         {
-
             this.Update();
-
             inputHelper.Update();
             Move(WindowHeight, WindowWidth);
 
@@ -114,12 +109,18 @@ namespace Hydra
         {
             bool jump = false;
             bool floor = true;
+
             foreach (var obj in objects)
             {
                 if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
                     (Velocity.X < 0 && this.IsTouchingRight(obj)))
                 {
                     Velocity.X = 0;
+
+                    if (obj.Texture.Name == "Flag")
+                    {
+                        currentLvl++;
+                    }
                 }
 
                 if ((Velocity.Y >= 0 && this.IsTouchingBottom(obj)) ||
@@ -131,12 +132,18 @@ namespace Hydra
                     }
 
                     Velocity.Y = 0;
+
+                    if (obj.Texture.Name == "Flag")
+                    {
+                        currentLvl++;
+                    }
                 }
 
                 if (!this.IsTouchingBottom(obj))
                 {
                     jump = true;
                 }
+
             }
 
             if (floor == false)
@@ -174,7 +181,7 @@ namespace Hydra
                 // currentState = State.Jumping;
                 if (Position.Y >= 0)
                 {
-                    Velocity.Y = -14;                
+                    Velocity.Y = -12;                
                     hasJumped = true;
                 }
             }

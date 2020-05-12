@@ -71,9 +71,20 @@ namespace Hydra
             BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, Texture.Width, Texture.Height);
         }
 
+        public virtual void Update(int offsetX, int offsetY, int Width, int Height)
+        {
+            BoundingBox = new Rectangle((int)Position.X + offsetX, (int)Position.Y + offsetY, Width, Height);
+        }
+
+
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, Position, Color.White);
+        }
+
+        public void Dispose()
+        {
+            Texture.Dispose();
         }
     }
 }

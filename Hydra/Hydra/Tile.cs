@@ -17,6 +17,13 @@ namespace Hydra
             this.Update();
         }
 
+        public Tile(Texture2D texture, int positionx, int positiony, int offsetX, int offsetY, int width, int height)
+        {
+            Texture = texture;
+            Position = new Vector2(positionx, positiony);
+            this.Update(offsetX, offsetY, width, height);
+        }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();

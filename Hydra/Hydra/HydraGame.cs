@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -14,13 +15,11 @@ namespace Hydra
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private Texture2D background;
         private Player player;
         private List<Tile> tiles = new List<Tile>();
-        private Tile floor;
         private List<Object2D> objects = new List<Object2D>();
-
-        private Background mBackgroundOne;
+        private Background mBackground = new Background();
+        private int lvlState = 1;
 
         public HydraGame()
         {
@@ -38,8 +37,6 @@ namespace Hydra
         /// </summary>
         protected override void Initialize()
         {
-            mBackgroundOne = new Background();
-            mBackgroundOne.Scale = 2.0f;
 
             //mBackgroundTwo = new Background();
             //mBackgroundTwo.Scale = 1.0f;
@@ -57,33 +54,27 @@ namespace Hydra
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            mBackgroundOne.LoadContent(this.Content, "background/gamebackgroundfull");
-            mBackgroundOne.Position = new Vector2(0, 0);
-            //mBackgroundTwo.LoadContent(this.Content, "background/gamebackgroundright");
-            //mBackgroundTwo.Position = new Vector2(mBackgroundOne.Position.X + mBackgroundOne.Size.Width, 0);
-
-            //background = Content.Load<Texture2D>("images/bulkhead-wallsx3"); // change these names to the names of your images
-            background = Content.Load<Texture2D>("background/stars"); // change these names to the names of your images
-
+            
             Texture2D playerLI = Content.Load<Texture2D>("player/HydraLeftIdle_v1.2");
             Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
             Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
             Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
-
-            Texture2D textureTile = Content.Load<Texture2D>("tile/blockA1");
-            Texture2D textureFloor = Content.Load<Texture2D>("tile/sprite_floor0.11");
             player = new Player(playerLI, playerRI, playerLW, playerRW, 2, 1);
-            tiles.Add(new Tile(textureTile, 600, 400));
-            tiles.Add(new Tile(textureTile, 500, 250));
-            floor = new Tile(textureFloor, 0, 540);
-            foreach(var tile in tiles)
+            LoadBackground();
+            LoadContent(lvlState);
+        }
+
+        protected void LoadContent(int state)
+        {
+            if (state == 1)
             {
-                objects.Add(tile);
+                LoadLevel1();
             }
-            //objects.Add(tile);
-            objects.Add(floor);
-            //shuttle = Content.Load<Texture2D>("images/shuttle");  // if you are using your own images.
-            //earth = Content.Load<Texture2D>("images/earth");
+            else if (state == 2)
+            {
+                LoadLevel2();
+            }           
+
         }
 
         /// <summary>
@@ -92,6 +83,7 @@ namespace Hydra
         /// </summary>
         protected override void UnloadContent()
         {
+            Content.Unload();
             // TODO: Unload any non ContentManager content here
         }
 
@@ -101,21 +93,17 @@ namespace Hydra
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
-        {           
-
-            Console.WriteLine(mBackgroundOne.Position.X);
+        {
+            int previous = player.currentLvl;
             player.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, objects);
-
-            //if (player.Position.X == graphics.PreferredBackBufferWidth / 2)
-            //{
-            //    mBackgroundOne.Position.X += speed;
-            //}
-
-            //currentFrame++;
-            //if (currentFrame >= fps) 
-            //{
-            //    currentFrame = 0;
-            //}                                    
+            lvlState = player.currentLvl;
+            if (player.currentLvl != previous)
+            {
+                UnloadContent();
+                LoadContent();
+                //LoadContent(player.currentLvl);
+            }
+            
             base.Update(gameTime);
         }
 
@@ -129,19 +117,63 @@ namespace Hydra
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            mBackgroundOne.Draw(this.spriteBatch);
+            mBackground.Draw(this.spriteBatch);
             //mBackgroundTwo.Draw(this.spriteBatch);
             spriteBatch.End();
-            
-            foreach(var tile in tiles)
+
+            foreach (var tile in tiles)
             {
                 tile.Draw(spriteBatch);
             }
-            //tile.Draw(spriteBatch);
-            floor.Draw(spriteBatch);
             player.Draw(spriteBatch);
 
             base.Draw(gameTime);
+        }
+
+
+        public void LoadLevel1()
+        {
+            Texture2D textureTile1 = Content.Load<Texture2D>("tile/small_p1");
+            Texture2D textureTile2 = Content.Load<Texture2D>("tile/medium_p1_tree");
+            Texture2D textureFloor = Content.Load<Texture2D>("tile/floor");
+            Texture2D textureFlag= Content.Load<Texture2D>("object/flag");
+            textureFlag.Name = "Flag";
+
+            tiles.Add(new Tile(textureTile1, 300, 400, 0, 5, textureTile1.Width, textureTile1.Height - 20));
+            tiles.Add(new Tile(textureTile2, 500, 270, 30, 90, textureTile2.Width -30, textureTile2.Height - 95));
+            tiles.Add(new Tile(textureFlag, 700, 300));
+            tiles.Add(new Tile(textureFloor, 0, 540));
+
+            objects = new List<Object2D>();
+            foreach (var tile in tiles)
+            {
+                objects.Add(tile);
+            }
+        }
+
+        public void LoadLevel2()
+        {
+            Texture2D textureTile1 = Content.Load<Texture2D>("tile/small_p1");
+            Texture2D textureTile2 = Content.Load<Texture2D>("tile/medium_p1_tree");
+            Texture2D textureFloor = Content.Load<Texture2D>("tile/floor");
+
+            tiles.Add(new Tile(textureTile1, 500, 400, 0, 5, textureTile1.Width, textureTile1.Height - 20));
+            tiles.Add(new Tile(textureTile2, 300, 270, 30, 90, textureTile2.Width - 30, textureTile2.Height - 95));
+            tiles.Add(new Tile(textureFloor, 0, 540));
+
+            objects = new List<Object2D>();
+            foreach (var tile in tiles)
+            {
+                objects.Add(tile);
+            }
+        }
+
+        public void LoadBackground()
+        {
+            mBackground = new Background();
+            mBackground.Scale = 2.0f;
+            mBackground.LoadContent(this.Content, "background/gamebackgroundfull");
+            mBackground.Position = new Vector2(0, 0);
         }
     }
 }
