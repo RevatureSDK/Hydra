@@ -26,6 +26,8 @@ namespace Hydra
         private Texture2D TextureRW;
         private bool hasJumped;
         public bool reachedExit = false;
+        public bool alive;
+        public int lives = 1;
 
         public Player(Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
@@ -44,6 +46,7 @@ namespace Hydra
             Velocity = new Vector2(0, 0);
             hasJumped = true;
             currentState = State.Idle;
+            alive = true;
         }
 
         enum State
@@ -121,6 +124,10 @@ namespace Hydra
                     {
                         reachedExit = true;
                     }
+                    if (obj.Texture.Name == "Damage")
+                    {
+                        alive = false;
+                    }
                 }
 
                 if ((Velocity.Y >= 0 && this.IsTouchingBottom(obj)) ||
@@ -136,6 +143,10 @@ namespace Hydra
                     if (obj.Texture.Name == "Flag")
                     {
                         reachedExit = true;
+                    }
+                    if (obj.Texture.Name == "Damage")
+                    {
+                        alive = false;
                     }
                 }
 

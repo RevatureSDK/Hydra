@@ -75,7 +75,12 @@ namespace Hydra
         protected override void Update(GameTime gameTime)
         {
             level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
-            if (level.reachedExit)
+
+            if (!level.player.alive)
+            {
+                lvlState--;
+                LoadNextLevel();
+            } else if (level.player.reachedExit)
             {
                 LoadNextLevel();
             }

@@ -15,11 +15,10 @@ namespace Hydra
         private List<Tile> tiles = new List<Tile>();
         private List<Object2D> objects;
         private Background mBackground = new Background();
-        private Player player;
+        public Player player;
 
         // Key locations in the level.        
         private Vector2 start;
-        public bool reachedExit = false;
 
         // Level content.        
         public ContentManager Content;
@@ -63,10 +62,13 @@ namespace Hydra
             Texture2D textureTile2 = Content.Load<Texture2D>("tile/medium_p1_tree");
             Texture2D textureFloor = Content.Load<Texture2D>("tile/floor");
             Texture2D textureFlag = Content.Load<Texture2D>("object/flag");
+            Texture2D textureCerberus = Content.Load<Texture2D>("enemy/cerberus");
             textureFlag.Name = "Flag";
+            textureCerberus.Name = "Damage";
 
             tiles.Add(new Tile(textureTile1, 300, 400, 0, 5, textureTile1.Width, textureTile1.Height - 20));
             tiles.Add(new Tile(textureTile2, 500, 270, 30, 90, textureTile2.Width - 30, textureTile2.Height - 95));
+            tiles.Add(new Tile(textureCerberus, 410, 465));
             tiles.Add(new Tile(textureFlag, 700, 300));
             tiles.Add(new Tile(textureFloor, 0, 540));
 
@@ -82,9 +84,15 @@ namespace Hydra
             Texture2D textureTile1 = Content.Load<Texture2D>("tile/small_p1");
             Texture2D textureTile2 = Content.Load<Texture2D>("tile/medium_p1_tree");
             Texture2D textureFloor = Content.Load<Texture2D>("tile/floor");
+            Texture2D textureFlag = Content.Load<Texture2D>("object/flag");
+            Texture2D textureCerberus = Content.Load<Texture2D>("enemy/cerberus");
+            textureFlag.Name = "Flag";
+            textureCerberus.Name = "Damage";
 
-            tiles.Add(new Tile(textureTile1, 500, 400, 0, 5, textureTile1.Width, textureTile1.Height - 20));
-            tiles.Add(new Tile(textureTile2, 300, 270, 30, 90, textureTile2.Width - 30, textureTile2.Height - 95));
+            tiles.Add(new Tile(textureTile1, 300, 400, 0, 5, textureTile1.Width, textureTile1.Height - 20));
+            tiles.Add(new Tile(textureTile2, 500, 270, 30, 90, textureTile2.Width - 30, textureTile2.Height - 95));
+            tiles.Add(new Tile(textureCerberus, 410, 465));
+            tiles.Add(new Tile(textureFlag, 700, 300));
             tiles.Add(new Tile(textureFloor, 0, 540));
 
             objects = new List<Object2D>();
@@ -92,6 +100,8 @@ namespace Hydra
             {
                 objects.Add(tile);
             }
+
+            player.Speed *= -1;
         }
 
         public void Dispose()
@@ -102,10 +112,6 @@ namespace Hydra
         public void Update(int width, int height, GameTime gameTime)
         {
             player.Update(width, height, objects);
-            if (player.reachedExit)
-            {
-                this.reachedExit = true;
-            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -116,6 +122,7 @@ namespace Hydra
             {
                 tile.Draw(spriteBatch);
             }
+
             player.Draw(spriteBatch);
         }
 
