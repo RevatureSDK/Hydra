@@ -26,9 +26,7 @@ namespace Hydra
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Begin();
             spriteBatch.Draw(Texture, Position, Color.White);
-            spriteBatch.End();
         }
     }
 }

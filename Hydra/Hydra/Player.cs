@@ -25,7 +25,7 @@ namespace Hydra
         private Texture2D TextureLW;
         private Texture2D TextureRW;
         private bool hasJumped;
-        public int currentLvl = 1;
+        public bool reachedExit = false;
 
         public Player(Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
@@ -119,7 +119,7 @@ namespace Hydra
 
                     if (obj.Texture.Name == "Flag")
                     {
-                        currentLvl++;
+                        reachedExit = true;
                     }
                 }
 
@@ -135,7 +135,7 @@ namespace Hydra
 
                     if (obj.Texture.Name == "Flag")
                     {
-                        currentLvl++;
+                        reachedExit = true;
                     }
                 }
 
@@ -202,9 +202,7 @@ namespace Hydra
             Rectangle sourceRectangle = new Rectangle(width * column, height * row, width, height);
             Rectangle destinationRectangle = new Rectangle((int)Position.X, (int)Position.Y, width, height);
 
-            spriteBatch.Begin();
             spriteBatch.Draw(Texture, destinationRectangle, sourceRectangle, Color.White);
-            spriteBatch.End();
         }
     }
 }
