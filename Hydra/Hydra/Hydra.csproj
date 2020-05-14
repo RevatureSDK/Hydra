@@ -43,6 +43,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Background.cs" />
+    <Compile Include="Enemy.cs" />
     <Compile Include="HydraGame.cs" />
     <Compile Include="InputHelper.cs" />
     <Compile Include="Level.cs" />

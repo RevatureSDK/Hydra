@@ -29,4 +29,5 @@ namespace Hydra
             spriteBatch.Draw(Texture, Position, Color.White);
         }
     }
+
 }

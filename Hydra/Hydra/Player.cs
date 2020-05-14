@@ -29,7 +29,7 @@ namespace Hydra
         public bool alive;
         public int lives = 1;
 
-        public Player(Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
+        public Player(int startingX, int startingY, Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
             Texture = textureRI;
             TextureLI = textureLI;
@@ -42,7 +42,7 @@ namespace Hydra
             totalFrames = Rows * Columns;
             inputHelper = new InputHelper();
             Speed = INITIAL_SPEED;
-            Position = new Vector2(STARTING_POSITIONX, STARTING_POSITIONY);
+            Position = new Vector2(startingX, startingY);
             Velocity = new Vector2(0, 0);
             hasJumped = true;
             currentState = State.Idle;
