@@ -18,6 +18,8 @@ namespace Hydra
         private Background mBackground = new Background();
         public Player player;
         public Enemy enemy;
+        int startingX = 100;
+        int startingY = 250;
 
         // Key locations in the level.        
         private Vector2 start;
@@ -33,9 +35,14 @@ namespace Hydra
             if (lvlState == 1)
             {
                 LoadLevel1();
-            } else if (lvlState == 2)
+            }
+            else if (lvlState == 2)
             {
                 LoadLevel2();
+            }
+            else if (lvlState == 3)
+            {
+                LoadLevel3();
             }
         }
 
@@ -45,16 +52,7 @@ namespace Hydra
             Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
             Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
             Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
-            player = new Player(50, 300, playerLI, playerRI, playerLW, playerRW, 2, 1);
-        }
-
-        public void LoadEnemy()
-        {
-
-            Texture2D textureFireball = Content.Load<Texture2D>("enemy/fireball");
-            textureFireball.Name = "Damage";
-            enemy = new Enemy(textureFireball, 450, 0, 1, 1);
-            objects.Add(enemy);
+            player = new Player(startingX, startingY, playerLI, playerRI, playerLW, playerRW, 2, 1);
         }
 
         public void LoadBackground()
@@ -62,16 +60,17 @@ namespace Hydra
             mBackground = new Background();
             mBackground.Scale = 2.0f;
             mBackground.LoadContent(this.Content, "background/gamebackgroundfull");
-            mBackground.Position = new Vector2(0, 0);
+            mBackground.Position = new Vector2(0, 0); 
         }
 
         public void LoadTiles()
         {
-            objects = new List<Object2D>();         
+            objects = new List<Object2D>();
 
             tiles.Add(SmallPlatform(300, 400));
             tiles.Add(MediumPlatform(500, 270));
-            tiles.Add(Cerberus(410, 465));
+            //tiles.Add(Cerberus(410, 465));
+            //LoadEnemy(410, 465);
             tiles.Add(Exit(700, 300));
             tiles.Add(LongPlatform(0, 540));
 
@@ -81,11 +80,11 @@ namespace Hydra
             }
         }
 
+
         public void LoadLevel1()
         {
             LoadBackground();
             LoadTiles();
-            LoadEnemy();
             LoadPlayer();
         }
 
@@ -93,9 +92,17 @@ namespace Hydra
         {
             LoadBackground();
             LoadTiles();
-            LoadEnemy();
             LoadPlayer();
             player.Speed *= -1;
+        }
+
+        public void LoadLevel3()
+        {
+            LoadBackground();
+            string levelPath = string.Format("Content/levels/3.txt");
+            Stream fileStream = TitleContainer.OpenStream(levelPath);
+            LoadTiles(fileStream);
+            LoadPlayer();
         }
 
 
@@ -108,14 +115,56 @@ namespace Hydra
 
         public Tile MediumPlatform(int x, int y)
         {
-            Texture2D textureTile2 = Content.Load<Texture2D>("tile/medium_p1_tree");
-            return new Tile(textureTile2, x, y, 30, 90, textureTile2.Width - 30, textureTile2.Height - 95);
+            Texture2D textureTile = Content.Load<Texture2D>("tile/medium_p1_tree");
+            return new Tile(textureTile, x, y, 30, 90, textureTile.Width - 30, textureTile.Height - 95);
         }
 
         public Tile LongPlatform(int x, int y)
         {
             Texture2D textureFloor = Content.Load<Texture2D>("tile/longfloor");
             return new Tile(textureFloor, x, y);
+        }
+
+        public Tile LongLeftPlatform(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloorleft");
+            return new Tile(textureTile, x, y);
+        }
+
+        public Tile LongMiddlePlatform(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloormid");
+            return new Tile(textureTile, x, y);
+        }
+
+        public Tile LongRightPlatform(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloorright");
+            return new Tile(textureTile, x, y);
+        }
+
+        public Tile CliffTopLeft(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/clifftop");
+            return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
+        }
+
+        public Tile CliffTopRight (int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/clifftopr");
+            return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
+        }
+
+        public Tile CliffBottomLeft(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/cliffmid");
+            return new Tile(textureTile, x, y);
+        }
+
+        public Tile CliffBottomRight(int x, int y)
+        {
+            Texture2D textureTile = Content.Load<Texture2D>("tile/cliffmidr");
+            return new Tile(textureTile, x, y);
         }
 
         public Tile Exit(int x, int y)
@@ -138,8 +187,11 @@ namespace Hydra
         }
 
         public void Update(int width, int height, GameTime gameTime)
-        {
-            enemy.Update(width, height);
+        { 
+            if (enemy != null)
+            {
+                enemy.Update(width, height);
+            }
             player.Update(width, height, objects);
         }
 
@@ -151,7 +203,11 @@ namespace Hydra
             {
                 tile.Draw(spriteBatch);
             }
-            enemy.Draw(spriteBatch);
+            if (enemy != null)
+            {
+                enemy.Draw(spriteBatch);
+            }
+
             player.Draw(spriteBatch);
         }
 
@@ -174,18 +230,88 @@ namespace Hydra
             }
 
             // Allocate the tile grid.
+            var gridTiles = new Tile[width, lines.Count];
+            var Width = lines[0].Length;
+            var Height = lines.Count;
 
+            objects = new List<Object2D>();
             // Loop over every tile position,
-            for (int y = 0; y < lines.Count; ++y)
+            for (int y = 0; y < Height; y++)
             {
-                for (int x = 0; x < lines[0].Length; ++x)
+                for (int x = Width-1; x >= 0; x--)
                 {
-
+                    char tileType = lines[y][x];
+                    var tile = LoadTile(tileType, x, y);
+                    if (tile != null)
+                    {
+                        tiles.Add(tile);
+                    }                    
                 }
             }
 
+            foreach (var tile in tiles)
+            {
+                objects.Add(tile);
+            }
         }
 
+        private Tile LoadTile(char tileType, int x, int y)
+        {
+            x *= 50;
+            y *= 50;
+            switch (tileType)
+            {
+                case ' ':
+                    return null;
+
+                case '.':
+                    return null;
+
+                case 'X':
+                    return Exit(x, y);
+
+                case '@':
+                    return SmallPlatform(x, y);
+
+                case '_':
+                    return MediumPlatform(x, y);
+
+                case '=':
+                    return LongPlatform(x, y);
+
+                case '|':
+                    return LongMiddlePlatform(x, y);
+
+                case '<':
+                    return LongLeftPlatform(x, y);
+
+                case '>':
+                    return LongRightPlatform(x, y);
+
+                case '{':
+                    return CliffTopLeft(x, y);
+
+                case '}':
+                    return CliffTopRight(x, y);
+
+                case '(':
+                    return CliffBottomLeft(x, y);
+
+                case ')':
+                    return CliffBottomRight(x, y);
+
+                case 'C':
+                    return Cerberus(x, y);
+
+                case 'H':
+                    startingX = x;
+                    startingY = y;
+                    return null;
+
+                default:
+                    throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at position {1}, {2}.", tileType, x, y));
+            }
+        }
 
     }
 }

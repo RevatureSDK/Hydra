@@ -8,31 +8,24 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Hydra
 {
-    public abstract class Enemy : Object2D
-    { 
+    public class Fireball : Enemy
+    {
         public int Rows { get; set; }
         public int Columns { get; set; }
         private int currentFrame;
         private int totalFrames;
 
 
-        protected Enemy(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns)
+        public Fireball(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns) : base(enemyTexture, startingX, startingY, rows, columns)
         {
-            Texture = enemyTexture;
-            Position.X = startingX;
-            Position.Y = startingY;
-            Rows = rows;
-            Columns = columns;
-            currentFrame = 0;
-            totalFrames = Rows * Columns;
+            //Texture = enemyTexture;
+            //Position.X = startingX;
+            //Position.Y = startingY;
+            //Rows = rows;
+            //Columns = columns;
+            //currentFrame = 0;
+            //totalFrames = Rows * Columns;
         }
-
-        //public void LoadEnemy(int x, int y)
-        //{
-        //    textureFireball.Name = "Damage";
-        //    enemy = new Enemy(textureFireball, x, y, 1, 1);
-        //    objects.Add(enemy);
-        //}
 
         public override void Update()
         {

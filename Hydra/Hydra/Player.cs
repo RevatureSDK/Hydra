@@ -15,8 +15,8 @@ namespace Hydra
         private int currentFrame;
         private int totalFrames;
         private InputHelper inputHelper;
-        private const int  STARTING_POSITIONX = 200;
-        private const int  STARTING_POSITIONY = 200;
+        private const int  STARTING_POSITIONX = 310;
+        private const int  STARTING_POSITIONY = 400;
         private const int INITIAL_SPEED = 4;
         private State currentState;
         private int totalFps = 0;
@@ -185,6 +185,11 @@ namespace Hydra
                 {
                     Velocity.X = -Speed;
                 }
+            }
+
+            if (Position.Y >= WindowHeight + Texture.Height)
+            {
+                alive = false;
             }
 
             if ((inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.Space) || inputHelper.IsKeyDown(Keys.W)) && hasJumped == false)
