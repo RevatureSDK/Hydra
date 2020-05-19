@@ -16,11 +16,10 @@ namespace Hydra
         private int totalFrames;
 
 
-        protected Enemy(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns)
+        protected Enemy(Texture2D enemyTexture, Vector2 pos, int rows, int columns)
         {
             Texture = enemyTexture;
-            Position.X = startingX;
-            Position.Y = startingY;
+            Position = pos;
             Rows = rows;
             Columns = columns;
             currentFrame = 0;

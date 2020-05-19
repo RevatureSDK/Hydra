@@ -19,12 +19,11 @@ namespace Hydra
         public Player player;
         public Fireball fireball;
         public Cerberus cerberus;
-        int playerX = 100;
-        int playerY = 250;
-        int cerberusX;
-        int cerberusY;
-        int fireballX;
-        int fireballY;
+
+        Vector2 playerPos;
+        Vector2 cerberusPos;
+        Vector2 fireballPos;
+        public bool jumpPower = false;
 
         // Key locations in the level.    
         private Vector2 start;
@@ -37,43 +36,28 @@ namespace Hydra
             // Create a new content manager to load content used just by this level.
             Content = new ContentManager(serviceProvider, "Content");
 
-            if (lvlState == 1)
+            if (lvlState >= 4)
             {
-                LoadLevel1();
+                jumpPower = true;
             }
-            else if (lvlState == 2)
+
+            LoadLevel(lvlState);
+
+            if (lvlState == 2)
             {
-                LoadLevel2();
-            }
-            else if (lvlState == 3)
-            {
-                LoadLevel3();
+                player.Speed *= -1;
             }
         }
 
-        public void LoadPlayer()
+        public void LoadLevel(int lvl)
         {
-            Texture2D playerLI = Content.Load<Texture2D>("player/HydraLeftIdle_v1.2");
-            Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
-            Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
-            Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
-            player = new Player(playerX, playerY, playerLI, playerRI, playerLW, playerRW, 2, 1);
-        }
-
-        public void LoadFireball(int x, int y)
-        {
-            Texture2D fireballTexture = Content.Load<Texture2D>("enemy/fireball");
-            fireballTexture.Name = "Damage";
-            fireball = new Fireball(fireballTexture, x, y, 1, 1);
-            objects.Add(fireball);
-        }
-
-        public void LoadCerberus(int x, int y)
-        {
-            Texture2D cerberusTexture = Content.Load<Texture2D>("enemy/cerberus");
-            cerberusTexture.Name = "Damage";
-            cerberus = new Cerberus(cerberusTexture, x, y, 1, 1);
-            objects.Add(cerberus);
+            LoadBackground();
+            string levelPath = string.Format("Content/levels/{0}.txt", lvl);
+            Stream fileStream = TitleContainer.OpenStream(levelPath);
+            LoadTiles(fileStream);
+            LoadPlayer();
+            LoadCerberus();
+            LoadFireball();
         }
 
         public void LoadBackground()
@@ -81,88 +65,7 @@ namespace Hydra
             mBackground = new Background();
             mBackground.Scale = 2.0f;
             mBackground.LoadContent(this.Content, "background/gamebackgroundfull");
-            mBackground.Position = new Vector2(0, 0); 
-        }
-
-        public void LoadLevel1()
-        {
-            LoadBackground();
-            LoadBackground();
-            string levelPath = string.Format("Content/levels/1.txt");
-            Stream fileStream = TitleContainer.OpenStream(levelPath);
-            LoadTiles(fileStream);
-            LoadCerberus(cerberusX, cerberusY);
-            LoadFireball(fireballX, fireballY);                        
-            LoadPlayer();
-        }
-
-        public void LoadLevel2()
-        {
-            LoadBackground();
-            string levelPath = string.Format("Content/levels/2.txt");
-            Stream fileStream = TitleContainer.OpenStream(levelPath);
-            LoadTiles(fileStream);
-            LoadCerberus(cerberusX, cerberusY);
-            LoadFireball(fireballX, fireballY);            
-            LoadPlayer();
-            player.Speed *= -1;
-        }
-
-        public void LoadLevel3()
-        {
-            LoadBackground();
-            string levelPath = string.Format("Content/levels/3.txt");
-            Stream fileStream = TitleContainer.OpenStream(levelPath);
-            LoadTiles(fileStream);
-            LoadCerberus(cerberusX, cerberusY);
-            LoadFireball(fireballX, fireballY);
-            LoadPlayer();
-        }
-
-        public void Dispose()
-        {
-            Content.Unload();
-        }
-
-        public void Update(int width, int height, GameTime gameTime)
-        {
-            if (cerberus != null)
-            {
-                cerberus.Update();
-            }
-
-            if (fireball != null)
-            {
-                fireball.Update(width, height);                
-
-                if (fireball.Position.X <= -50)
-                {
-                    LoadFireball(fireballX, fireballY);
-                }
-            }            
-
-            player.Update(width, height, objects);
-        }
-
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            mBackground.Draw(spriteBatch);
-
-            foreach (var tile in tiles)
-            {
-                tile.Draw(spriteBatch);
-            }
-            if (fireball != null)
-            {
-                fireball.Draw(spriteBatch);
-            }
-
-            if (cerberus != null)
-            {
-                cerberus.Draw(spriteBatch);
-            }
-
-            player.Draw(spriteBatch);
+            mBackground.Position = new Vector2(0, 0);
         }
 
         private void LoadTiles(Stream fileStream)
@@ -183,29 +86,21 @@ namespace Hydra
                 }
             }
 
-            // Allocate the tile grid.
-            var gridTiles = new Tile[width, lines.Count];
             var Width = lines[0].Length;
             var Height = lines.Count;
 
             objects = new List<Object2D>();
-            // Loop over every tile position,
             for (int y = 0; y < Height; y++)
             {
-                for (int x = Width-1; x >= 0; x--)
+                for (int x = Width - 1; x >= 0; x--)
                 {
                     char tileType = lines[y][x];
                     var tile = LoadTile(tileType, x, y);
                     if (tile != null)
                     {
-                        tiles.Add(tile);
-                    }                    
+                        objects.Add(tile);
+                    }
                 }
-            }
-
-            foreach (var tile in tiles)
-            {
-                objects.Add(tile);
             }
         }
 
@@ -225,6 +120,11 @@ namespace Hydra
                 case 'X':
                     textureTile = Content.Load<Texture2D>("object/flag");
                     textureTile.Name = "Flag";
+                    return new Tile(textureTile, x, y);
+
+                case 'J':
+                    textureTile = Content.Load<Texture2D>("object/star");
+                    textureTile.Name = "Jump";
                     return new Tile(textureTile, x, y);
 
                 case '@':
@@ -272,15 +172,12 @@ namespace Hydra
                     return new Tile(textureTile, x, y);
 
                 case 'C':
-                    cerberusX = x;
-                    cerberusY = y;
-                    fireballX = x;
-                    fireballY = y + 15;
+                    cerberusPos = new Vector2(x, y);
+                    fireballPos = new Vector2(x, y + 15);
                     return null;
 
                 case 'H':
-                    playerX = x;
-                    playerY = y;
+                    playerPos = new Vector2(x, y);
                     return null;
 
                 default:
@@ -288,5 +185,82 @@ namespace Hydra
             }
         }
 
+        public void LoadPlayer()
+        {
+            Texture2D playerLI = Content.Load<Texture2D>("player/HydraLeftIdle_v1.2");
+            Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
+            Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
+            Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
+            player = new Player(playerPos, playerLI, playerRI, playerLW, playerRW, 2, 1);
+            player.jumpPower = this.jumpPower;
+        }
+
+        public void LoadCerberus()
+        {
+            Texture2D cerberusTexture = Content.Load<Texture2D>("enemy/cerberus");
+            cerberusTexture.Name = "Damage";
+            cerberus = new Cerberus(cerberusTexture, cerberusPos, 1, 1);
+            objects.Add(cerberus);
+        }
+
+        public void LoadFireball()
+        {
+            Texture2D fireballTexture = Content.Load<Texture2D>("enemy/fireball");
+            fireballTexture.Name = "Damage";
+            fireball = new Fireball(fireballTexture, fireballPos, 1, 1);
+            objects.Add(fireball);
+        }
+
+        public void Update(int width, int height, GameTime gameTime)
+        {
+            if (cerberus != null)
+            {
+                cerberus.Update();
+            }
+
+            if (fireball != null)
+            {
+                fireball.Update(width, height);                
+
+                if (fireball.Position.X <= -50)
+                {
+                    LoadFireball();
+                }
+            }
+            
+            if (player.jumpPower)
+            {
+                int length = objects.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    if (objects[i] != null && objects[i].Texture.Name == "Jump")
+                    {
+                        objects[i] = null;
+                    }
+                }
+            }
+
+            player.Update(width, height, objects);
+        }
+
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            mBackground.Draw(spriteBatch);
+
+            foreach (var obj in objects)
+            {
+                if (obj != null)
+                {
+                    obj.Draw(spriteBatch);
+                }                    
+            }
+
+            player.Draw(spriteBatch);
+        }
+
+        public void Dispose()
+        {
+            Content.Unload();
+        }
     }
 }

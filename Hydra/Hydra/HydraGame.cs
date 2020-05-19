@@ -17,6 +17,7 @@ namespace Hydra
 
         private Level level;
         private int lvlState = 0;
+        private int lives = 3;
 
         public HydraGame()
         {
@@ -50,6 +51,7 @@ namespace Hydra
         private void LoadNextLevel()
         {
             lvlState++;
+
             // Unloads the content for the current level before loading the next one.
             if (level != null)
                 level.Dispose();
@@ -78,9 +80,21 @@ namespace Hydra
 
             if (!level.player.alive)
             {
-                lvlState--;
-                LoadNextLevel();
-            } else if (level.player.reachedExit)
+                lives--;
+                if (lives <= 0)
+                {
+                    //game over
+                    lives = 3;
+                    lvlState = 0;
+                    LoadNextLevel();
+                }
+                else
+                {
+                    lvlState--;
+                    LoadNextLevel();
+                }                
+            }
+            else if (level.player.reachedExit)
             {
                 LoadNextLevel();
             }
@@ -96,10 +110,27 @@ namespace Hydra
         {
             spriteBatch.Begin();
             level.Draw(gameTime, spriteBatch);
+            DrawHud();
             spriteBatch.End();
-
+            
             base.Draw(gameTime);
         }
 
+        private void DrawHud()
+        {
+            SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
+            Rectangle titleSafeArea = GraphicsDevice.Viewport.TitleSafeArea;
+            Vector2 hudLocation = new Vector2(titleSafeArea.X + 1000, titleSafeArea.Y + 15);
+
+            Texture2D textureHead = Content.Load<Texture2D>("hud/HydraHead");
+            spriteBatch.Draw(textureHead, new Vector2(950, 15), Color.White);
+            DrawShadowedString(hudFont, "x" + lives, hudLocation, Color.Black);
+        }
+
+        private void DrawShadowedString(SpriteFont font, string value, Vector2 position, Color color)
+        {
+            spriteBatch.DrawString(font, value, position + new Vector2(1.0f, 1.0f), Color.LightGray);
+            spriteBatch.DrawString(font, value, position, color);
+        }
     }
 }

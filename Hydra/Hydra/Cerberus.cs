@@ -16,11 +16,10 @@ namespace Hydra
         private int totalFrames;
 
 
-        public Cerberus(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns) : base(enemyTexture, startingX, startingY, rows, columns)
+        public Cerberus(Texture2D enemyTexture, Vector2 pos, int rows, int columns) : base(enemyTexture, pos, rows, columns)
         {
             Texture = enemyTexture;
-            Position.X = startingX;
-            Position.Y = startingY;
+            Position = pos;
             Rows = rows;
             Columns = columns;
             currentFrame = 0;

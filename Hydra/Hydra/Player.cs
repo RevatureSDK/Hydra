@@ -15,8 +15,6 @@ namespace Hydra
         private int currentFrame;
         private int totalFrames;
         private InputHelper inputHelper;
-        private const int  STARTING_POSITIONX = 310;
-        private const int  STARTING_POSITIONY = 400;
         private const int INITIAL_SPEED = 4;
         private State currentState;
         private int totalFps = 0;
@@ -25,11 +23,13 @@ namespace Hydra
         private Texture2D TextureLW;
         private Texture2D TextureRW;
         private bool hasJumped;
+        private bool hasDoubleJumped;
+        public bool jumpPower;
         public bool reachedExit = false;
         public bool alive;
         public int lives = 1;
 
-        public Player(int startingX, int startingY, Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
+        public Player(Vector2 pos, Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
             Texture = textureRI;
             TextureLI = textureLI;
@@ -42,9 +42,10 @@ namespace Hydra
             totalFrames = Rows * Columns;
             inputHelper = new InputHelper();
             Speed = INITIAL_SPEED;
-            Position = new Vector2(startingX, startingY);
+            Position = pos;
             Velocity = new Vector2(0, 0);
             hasJumped = true;
+            hasDoubleJumped = true;
             currentState = State.Idle;
             alive = true;
         }
@@ -115,46 +116,57 @@ namespace Hydra
 
             foreach (var obj in objects)
             {
-                if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
-                    (Velocity.X < 0 && this.IsTouchingRight(obj)))
+                if (obj != null)
                 {
-                    Velocity.X = 0;
+                    if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
+                        (Velocity.X < 0 && this.IsTouchingRight(obj)))
+                    {
+                        Velocity.X = 0;
 
-                    if (obj.Texture.Name == "Flag")
-                    {
-                        reachedExit = true;
+                        if (obj.Texture.Name == "Flag")
+                        {
+                            reachedExit = true;
+                        }
+                        if (obj.Texture.Name == "Damage")
+                        {
+                            alive = false;
+                        }
+                        if (obj.Texture.Name == "Jump")
+                        {
+                            jumpPower = true;
+                        }
                     }
-                    if (obj.Texture.Name == "Damage")
+
+                    if ((Velocity.Y >= 0 && this.IsTouchingBottom(obj)) ||
+                        (Velocity.Y <= 0 && this.IsTouchingTop(obj)))
                     {
-                        alive = false;
+                        if (this.IsTouchingBottom(obj))
+                        {
+                            floor = false;
+                            hasDoubleJumped = true;
+                        }
+
+                        Velocity.Y = 0;
+
+                        if (obj.Texture.Name == "Flag")
+                        {
+                            reachedExit = true;
+                        }
+                        if (obj.Texture.Name == "Damage")
+                        {
+                            alive = false;
+                        }
+                        if (obj.Texture.Name == "Jump")
+                        {
+                            jumpPower = true;
+                        }
+                    }
+
+                    if (!this.IsTouchingBottom(obj))
+                    {
+                        jump = true;
                     }
                 }
-
-                if ((Velocity.Y >= 0 && this.IsTouchingBottom(obj)) ||
-                    (Velocity.Y <= 0 && this.IsTouchingTop(obj)))
-                {
-                    if (this.IsTouchingBottom(obj))
-                    {
-                        floor = false;
-                    }
-
-                    Velocity.Y = 0;
-
-                    if (obj.Texture.Name == "Flag")
-                    {
-                        reachedExit = true;
-                    }
-                    if (obj.Texture.Name == "Damage")
-                    {
-                        alive = false;
-                    }
-                }
-
-                if (!this.IsTouchingBottom(obj))
-                {
-                    jump = true;
-                }
-
             }
 
             if (floor == false)
@@ -192,14 +204,23 @@ namespace Hydra
                 alive = false;
             }
 
-            if ((inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.Space) || inputHelper.IsKeyDown(Keys.W)) && hasJumped == false)
+            //if ((inputHelper.IsKeyDown(Keys.Up) || inputHelper.IsKeyDown(Keys.Space) || inputHelper.IsKeyDown(Keys.W))) //hasJumped == false
+            if ((inputHelper.IsNewKeyPress(Keys.Up) || inputHelper.IsNewKeyPress(Keys.Space) || inputHelper.IsNewKeyPress(Keys.W)))
             {
-                // currentState = State.Jumping;
-                if (Position.Y >= 0)
+                if (hasJumped == false)
                 {
-                    Velocity.Y = -12;                
+                    Velocity.Y = -12;
                     hasJumped = true;
                 }
+                else if (hasJumped == true && hasDoubleJumped == true)
+                {
+                    if (jumpPower)
+                    {
+                        Velocity.Y = -12;
+                        hasJumped = true;
+                        hasDoubleJumped = false;
+                    }                    
+                }                
             }
 
             if (hasJumped == true)
