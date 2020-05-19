@@ -18,13 +18,13 @@ namespace Hydra
 
         public Cerberus(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns) : base(enemyTexture, startingX, startingY, rows, columns)
         {
-            //Texture = tCerberus;
-            //Position.X = startingX;
-            //Position.Y = startingY;
-            //Rows = rows;
-            //Columns = columns;
-            //currentFrame = 0;
-            //totalFrames = Rows * Columns;
+            Texture = enemyTexture;
+            Position.X = startingX;
+            Position.Y = startingY;
+            Rows = rows;
+            Columns = columns;
+            currentFrame = 0;
+            totalFrames = Rows * Columns;
         }
 
         public override void Update()

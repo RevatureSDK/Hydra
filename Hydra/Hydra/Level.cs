@@ -19,10 +19,14 @@ namespace Hydra
         public Player player;
         public Fireball fireball;
         public Cerberus cerberus;
-        int startingX = 100;
-        int startingY = 250;
+        int playerX = 100;
+        int playerY = 250;
+        int cerberusX;
+        int cerberusY;
+        int fireballX;
+        int fireballY;
 
-        // Key locations in the level.        
+        // Key locations in the level.    
         private Vector2 start;
 
         // Level content.        
@@ -53,7 +57,7 @@ namespace Hydra
             Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
             Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
             Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
-            player = new Player(startingX, startingY, playerLI, playerRI, playerLW, playerRW, 2, 1);
+            player = new Player(playerX, playerY, playerLI, playerRI, playerLW, playerRW, 2, 1);
         }
 
         public void LoadFireball(int x, int y)
@@ -64,6 +68,14 @@ namespace Hydra
             objects.Add(fireball);
         }
 
+        public void LoadCerberus(int x, int y)
+        {
+            Texture2D cerberusTexture = Content.Load<Texture2D>("enemy/cerberus");
+            cerberusTexture.Name = "Damage";
+            cerberus = new Cerberus(cerberusTexture, x, y, 1, 1);
+            objects.Add(cerberus);
+        }
+
         public void LoadBackground()
         {
             mBackground = new Background();
@@ -72,35 +84,26 @@ namespace Hydra
             mBackground.Position = new Vector2(0, 0); 
         }
 
-        public void LoadTiles()
-        {
-            objects = new List<Object2D>();
-
-            tiles.Add(SmallPlatform(300, 400));
-            tiles.Add(MediumPlatform(500, 270));
-            tiles.Add(Cerberus(410, 465));
-            LoadFireball(410, 480);
-            tiles.Add(Exit(700, 300));
-            tiles.Add(LongPlatform(0, 540));
-
-            foreach (var tile in tiles)
-            {
-                objects.Add(tile);
-            }
-        }
-
-
         public void LoadLevel1()
         {
             LoadBackground();
-            LoadTiles();
+            LoadBackground();
+            string levelPath = string.Format("Content/levels/1.txt");
+            Stream fileStream = TitleContainer.OpenStream(levelPath);
+            LoadTiles(fileStream);
+            LoadCerberus(cerberusX, cerberusY);
+            LoadFireball(fireballX, fireballY);                        
             LoadPlayer();
         }
 
         public void LoadLevel2()
         {
             LoadBackground();
-            LoadTiles();
+            string levelPath = string.Format("Content/levels/2.txt");
+            Stream fileStream = TitleContainer.OpenStream(levelPath);
+            LoadTiles(fileStream);
+            LoadCerberus(cerberusX, cerberusY);
+            LoadFireball(fireballX, fireballY);            
             LoadPlayer();
             player.Speed *= -1;
         }
@@ -111,83 +114,9 @@ namespace Hydra
             string levelPath = string.Format("Content/levels/3.txt");
             Stream fileStream = TitleContainer.OpenStream(levelPath);
             LoadTiles(fileStream);
+            LoadCerberus(cerberusX, cerberusY);
+            LoadFireball(fireballX, fireballY);
             LoadPlayer();
-        }
-
-
-        public Tile SmallPlatform(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/small_p1");
-            return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height - 20);
-        }
-
-
-        public Tile MediumPlatform(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/medium_p1_tree");
-            return new Tile(textureTile, x, y, 30, 90, textureTile.Width - 30, textureTile.Height - 95);
-        }
-
-        public Tile LongPlatform(int x, int y)
-        {
-            Texture2D textureFloor = Content.Load<Texture2D>("tile/longfloor");
-            return new Tile(textureFloor, x, y);
-        }
-
-        public Tile LongLeftPlatform(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloorleft");
-            return new Tile(textureTile, x, y);
-        }
-
-        public Tile LongMiddlePlatform(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloormid");
-            return new Tile(textureTile, x, y);
-        }
-
-        public Tile LongRightPlatform(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/longfloorright");
-            return new Tile(textureTile, x, y);
-        }
-
-        public Tile CliffTopLeft(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/clifftop");
-            return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
-        }
-
-        public Tile CliffTopRight (int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/clifftopr");
-            return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
-        }
-
-        public Tile CliffBottomLeft(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/cliffmid");
-            return new Tile(textureTile, x, y);
-        }
-
-        public Tile CliffBottomRight(int x, int y)
-        {
-            Texture2D textureTile = Content.Load<Texture2D>("tile/cliffmidr");
-            return new Tile(textureTile, x, y);
-        }
-
-        public Tile Exit(int x, int y)
-        {
-            Texture2D textureFlag = Content.Load<Texture2D>("object/flag");
-            textureFlag.Name = "Flag";
-            return new Tile(textureFlag, x, y);
-        }
-
-        public Tile Cerberus(int x, int y)
-        {
-            Texture2D textureCerberus = Content.Load<Texture2D>("enemy/cerberus");
-            textureCerberus.Name = "Damage";
-            return new Tile(textureCerberus, x, y);
         }
 
         public void Dispose()
@@ -196,16 +125,22 @@ namespace Hydra
         }
 
         public void Update(int width, int height, GameTime gameTime)
-        { 
+        {
+            if (cerberus != null)
+            {
+                cerberus.Update();
+            }
+
             if (fireball != null)
             {
-                fireball.Update(width, height);
+                fireball.Update(width, height);                
 
                 if (fireball.Position.X <= -50)
                 {
-                    LoadFireball(410, 480);
+                    LoadFireball(fireballX, fireballY);
                 }
-            }
+            }            
+
             player.Update(width, height, objects);
         }
 
@@ -220,6 +155,11 @@ namespace Hydra
             if (fireball != null)
             {
                 fireball.Draw(spriteBatch);
+            }
+
+            if (cerberus != null)
+            {
+                cerberus.Draw(spriteBatch);
             }
 
             player.Draw(spriteBatch);
@@ -273,6 +213,7 @@ namespace Hydra
         {
             x *= 50;
             y *= 50;
+            Texture2D textureTile;
             switch (tileType)
             {
                 case ' ':
@@ -282,44 +223,64 @@ namespace Hydra
                     return null;
 
                 case 'X':
-                    return Exit(x, y);
+                    textureTile = Content.Load<Texture2D>("object/flag");
+                    textureTile.Name = "Flag";
+                    return new Tile(textureTile, x, y);
 
                 case '@':
-                    return SmallPlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/small_p1");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height - 20);
+
+                case '-':
+                    textureTile = Content.Load<Texture2D>("tile/tinyplatform");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height - 20);
 
                 case '_':
-                    return MediumPlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/medium_p1_tree");
+                    return new Tile(textureTile, x, y, 30, 90, textureTile.Width - 30, textureTile.Height - 95);
 
                 case '=':
-                    return LongPlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/longfloor");
+                    return new Tile(textureTile, x, y);
 
                 case '|':
-                    return LongMiddlePlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/longfloormid");
+                    return new Tile(textureTile, x, y);
 
                 case '<':
-                    return LongLeftPlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/longfloorleft");
+                    return new Tile(textureTile, x, y);
 
                 case '>':
-                    return LongRightPlatform(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/longfloorright");
+                    return new Tile(textureTile, x, y);
 
                 case '{':
-                    return CliffTopLeft(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/clifftop");
+                    return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
 
                 case '}':
-                    return CliffTopRight(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/clifftopr");
+                    return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
 
                 case '(':
-                    return CliffBottomLeft(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/cliffmid");
+                    return new Tile(textureTile, x, y);
 
                 case ')':
-                    return CliffBottomRight(x, y);
+                    textureTile = Content.Load<Texture2D>("tile/cliffmidr");
+                    return new Tile(textureTile, x, y);
 
                 case 'C':
-                    return Cerberus(x, y);
+                    cerberusX = x;
+                    cerberusY = y;
+                    fireballX = x;
+                    fireballY = y + 15;
+                    return null;
 
                 case 'H':
-                    startingX = x;
-                    startingY = y;
+                    playerX = x;
+                    playerY = y;
                     return null;
 
                 default:

@@ -27,27 +27,12 @@ namespace Hydra
             totalFrames = Rows * Columns;
         }
 
-        //public void LoadEnemy(int x, int y)
-        //{
-        //    Texture.Name = "Damage";
-        //    enemy = new Enemy(textureFireball, x, y, 1, 1);
-        //    objects.Add(enemy);
-        //}
-
         public override void Update()
         {
             int width = Texture.Width / Columns;
             int height = Texture.Height / Rows;
             BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, width, height);
         }
-
-        //public void Update(int WindowWidth, int WindowHeight)
-        //{
-        //    Vector2 velocity = new Vector2(-3.0f, 0);
-        //    Position += velocity;
-
-        //    this.Update();
-        //}
 
         public override void Draw(SpriteBatch spriteBatch)
         {
