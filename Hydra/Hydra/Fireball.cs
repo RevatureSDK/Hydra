@@ -18,21 +18,21 @@ namespace Hydra
 
         public Fireball(Texture2D enemyTexture, int startingX, int startingY, int rows, int columns) : base(enemyTexture, startingX, startingY, rows, columns)
         {
-            //Texture = enemyTexture;
-            //Position.X = startingX;
-            //Position.Y = startingY;
-            //Rows = rows;
-            //Columns = columns;
-            //currentFrame = 0;
-            //totalFrames = Rows * Columns;
+            Texture = enemyTexture;
+            Position.X = startingX;
+            Position.Y = startingY;
+            Rows = rows;
+            Columns = columns;
+            currentFrame = 0;
+            totalFrames = Rows * Columns;
         }
 
-        public override void Update()
-        {
-            int width = Texture.Width / Columns;
-            int height = Texture.Height / Rows;
-            BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, width, height);
-        }
+        //public override void Update()
+        //{
+        //    int width = Texture.Width / Columns;
+        //    int height = Texture.Height / Rows;
+        //    BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, width, height);
+        //}
 
         public void Update(int WindowWidth, int WindowHeight)
         {

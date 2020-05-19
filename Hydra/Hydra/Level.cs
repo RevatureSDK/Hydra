@@ -17,7 +17,8 @@ namespace Hydra
         private List<Object2D> objects;
         private Background mBackground = new Background();
         public Player player;
-        public Enemy enemy;
+        public Fireball fireball;
+        public Cerberus cerberus;
         int startingX = 100;
         int startingY = 250;
 
@@ -55,6 +56,14 @@ namespace Hydra
             player = new Player(startingX, startingY, playerLI, playerRI, playerLW, playerRW, 2, 1);
         }
 
+        public void LoadFireball(int x, int y)
+        {
+            Texture2D fireballTexture = Content.Load<Texture2D>("enemy/fireball");
+            fireballTexture.Name = "Damage";
+            fireball = new Fireball(fireballTexture, x, y, 1, 1);
+            objects.Add(fireball);
+        }
+
         public void LoadBackground()
         {
             mBackground = new Background();
@@ -69,8 +78,8 @@ namespace Hydra
 
             tiles.Add(SmallPlatform(300, 400));
             tiles.Add(MediumPlatform(500, 270));
-            //tiles.Add(Cerberus(410, 465));
-            //LoadEnemy(410, 465);
+            tiles.Add(Cerberus(410, 465));
+            LoadFireball(410, 480);
             tiles.Add(Exit(700, 300));
             tiles.Add(LongPlatform(0, 540));
 
@@ -188,9 +197,14 @@ namespace Hydra
 
         public void Update(int width, int height, GameTime gameTime)
         { 
-            if (enemy != null)
+            if (fireball != null)
             {
-                enemy.Update(width, height);
+                fireball.Update(width, height);
+
+                if (fireball.Position.X <= -50)
+                {
+                    LoadFireball(410, 480);
+                }
             }
             player.Update(width, height, objects);
         }
@@ -203,9 +217,9 @@ namespace Hydra
             {
                 tile.Draw(spriteBatch);
             }
-            if (enemy != null)
+            if (fireball != null)
             {
-                enemy.Draw(spriteBatch);
+                fireball.Draw(spriteBatch);
             }
 
             player.Draw(spriteBatch);
