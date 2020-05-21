@@ -14,6 +14,7 @@ namespace Hydra
         public int Columns { get; set; }
         private int currentFrame;
         private int totalFrames;
+        private int totalFps = 0;
 
 
         public Fireball(Texture2D enemyTexture, Vector2 pos, int rows, int columns) : base(enemyTexture, pos, rows, columns)
@@ -39,6 +40,16 @@ namespace Hydra
             Position += velocity;
 
             this.Update();
+
+            totalFps++;
+            if (totalFps % 10 == 0)
+            {
+                currentFrame++;
+            }
+            if (currentFrame == totalFrames)
+            {
+                currentFrame = 0;
+            }                
         }
 
         public override void Draw(SpriteBatch spriteBatch)

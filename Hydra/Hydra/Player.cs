@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Hydra
 {
@@ -28,9 +29,11 @@ namespace Hydra
         public bool reachedExit = false;
         public bool alive;
         public int lives = 1;
+        private Dictionary<string, SoundEffect> soundEffects;
 
-        public Player(Vector2 pos, Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
+        public Player(Vector2 pos, Dictionary<string, SoundEffect> se, Texture2D textureLI, Texture2D textureRI, Texture2D textureLW, Texture2D textureRW, int rows, int columns)
         {
+            soundEffects = se;
             Texture = textureRI;
             TextureLI = textureLI;
             TextureRI = textureRI;
@@ -127,7 +130,13 @@ namespace Hydra
                         {
                             reachedExit = true;
                         }
-                        if (obj.Texture.Name == "Damage")
+                        if (obj.Texture.Name == "Fireball")
+                        {
+                            alive = false;
+                            soundEffects["fireball"].CreateInstance().Play();
+                        }
+
+                        if (obj.Texture.Name == "Cerberus")
                         {
                             alive = false;
                         }
@@ -152,7 +161,12 @@ namespace Hydra
                         {
                             reachedExit = true;
                         }
-                        if (obj.Texture.Name == "Damage")
+                        if (obj.Texture.Name == "Fireball")
+                        {
+                            alive = false;
+                            soundEffects["fireball"].CreateInstance().Play();
+                        }
+                        if (obj.Texture.Name == "Cerberus")
                         {
                             alive = false;
                         }
@@ -209,6 +223,7 @@ namespace Hydra
             {
                 if (hasJumped == false)
                 {
+                    soundEffects["jump"].CreateInstance().Play();
                     Velocity.Y = -12;
                     hasJumped = true;
                 }
@@ -216,6 +231,7 @@ namespace Hydra
                 {
                     if (jumpPower)
                     {
+                        soundEffects["jump"].CreateInstance().Play();
                         Velocity.Y = -12;
                         hasJumped = true;
                         hasDoubleJumped = false;

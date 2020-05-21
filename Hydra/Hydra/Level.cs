@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -30,11 +31,13 @@ namespace Hydra
 
         // Level content.        
         public ContentManager Content;
+        public Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
 
-        public Level(IServiceProvider serviceProvider, int lvlState)
+        public Level(IServiceProvider serviceProvider, int lvlState, Dictionary<string, SoundEffect> se)
         {
             // Create a new content manager to load content used just by this level.
             Content = new ContentManager(serviceProvider, "Content");
+            this.soundEffects = se;
 
             if (lvlState >= 4)
             {
@@ -172,8 +175,8 @@ namespace Hydra
                     return new Tile(textureTile, x, y);
 
                 case 'C':
-                    cerberusPos = new Vector2(x, y);
-                    fireballPos = new Vector2(x, y + 15);
+                    cerberusPos = new Vector2(x - 10, y + 10);
+                    fireballPos = new Vector2(x - 12, y + 35);
                     return null;
 
                 case 'H':
@@ -191,23 +194,23 @@ namespace Hydra
             Texture2D playerRI = Content.Load<Texture2D>("player/HydraRightIdle_v1.2");
             Texture2D playerLW = Content.Load<Texture2D>("player/HydraLeftWalking_v1");
             Texture2D playerRW = Content.Load<Texture2D>("player/HydraRightWalking_v1");
-            player = new Player(playerPos, playerLI, playerRI, playerLW, playerRW, 2, 1);
+            player = new Player(playerPos, soundEffects, playerLI, playerRI, playerLW, playerRW, 2, 1);
             player.jumpPower = this.jumpPower;
         }
 
         public void LoadCerberus()
         {
-            Texture2D cerberusTexture = Content.Load<Texture2D>("enemy/cerberus");
-            cerberusTexture.Name = "Damage";
-            cerberus = new Cerberus(cerberusTexture, cerberusPos, 1, 1);
+            Texture2D cerberusTexture = Content.Load<Texture2D>("enemy/cerberusv2.2");
+            cerberusTexture.Name = "Cerberus";
+            cerberus = new Cerberus(cerberusTexture, cerberusPos, 3, 1);
             objects.Add(cerberus);
         }
 
         public void LoadFireball()
         {
-            Texture2D fireballTexture = Content.Load<Texture2D>("enemy/fireball");
-            fireballTexture.Name = "Damage";
-            fireball = new Fireball(fireballTexture, fireballPos, 1, 1);
+            Texture2D fireballTexture = Content.Load<Texture2D>("enemy/fireballv2");
+            fireballTexture.Name = "Fireball";
+            fireball = new Fireball(fireballTexture, fireballPos, 3, 1);
             objects.Add(fireball);
         }
 
@@ -215,7 +218,7 @@ namespace Hydra
         {
             if (cerberus != null)
             {
-                cerberus.Update();
+                cerberus.Update(width, height);
             }
 
             if (fireball != null)

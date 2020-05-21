@@ -14,6 +14,7 @@ namespace Hydra
         public int Columns { get; set; }
         private int currentFrame;
         private int totalFrames;
+        private int totalFps = 0;
 
 
         public Cerberus(Texture2D enemyTexture, Vector2 pos, int rows, int columns) : base(enemyTexture, pos, rows, columns)
@@ -33,13 +34,20 @@ namespace Hydra
             BoundingBox = new Rectangle((int)Position.X, (int)Position.Y, width, height);
         }
 
-        //public void Update(int WindowWidth, int WindowHeight)
-        //{
-        //    Vector2 velocity = new Vector2(-3.0f, 0);
-        //    Position += velocity;
+        public void Update(int WindowWidth, int WindowHeight)
+        {
+            this.Update();
 
-        //    this.Update();
-        //}
+            totalFps++;
+            if (totalFps % 10 == 0)
+            {
+                currentFrame++;
+            }
+            if (currentFrame == totalFrames)
+            {
+                currentFrame = 0;
+            }
+        }
 
         public override void Draw(SpriteBatch spriteBatch)
         {

@@ -2,6 +2,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
+// using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 
@@ -14,16 +17,29 @@ namespace Hydra
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        private Song gameMusic;
 
         private Level level;
         private int lvlState = 0;
         private int lives = 3;
+        private State currentState = State.Running;
+        private State previousState = State.Running;
+        private InputHelper inputHelper;
+
+        enum State
+        {
+            Running,
+            GameOver 
+        }
+
+        public Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
 
         public HydraGame()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1200;
             graphics.PreferredBackBufferHeight = 900;
+            inputHelper = new InputHelper();
             Content.RootDirectory = "Content";
         }
 
@@ -44,6 +60,13 @@ namespace Hydra
         /// </summary>
         protected override void LoadContent()
         {
+            gameMusic = Content.Load<Song>("audio/breakdown3");
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(gameMusic);
+            SoundEffect.MasterVolume = 0.4f;
+            soundEffects.Add("fireball", Content.Load<SoundEffect>("audio/fireHit"));
+            soundEffects.Add("gameOver", Content.Load<SoundEffect>("audio/gameOver"));
+            soundEffects.Add("jump", Content.Load<SoundEffect>("audio/jump"));
             spriteBatch = new SpriteBatch(GraphicsDevice);
             LoadNextLevel();
         }
@@ -57,7 +80,7 @@ namespace Hydra
                 level.Dispose();
 
             // Load the level.
-            level = new Level(Services, lvlState);
+            level = new Level(Services, lvlState, soundEffects);
         }
 
         /// <summary>
@@ -76,6 +99,7 @@ namespace Hydra
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            inputHelper.Update();
             level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
 
             if (!level.player.alive)
@@ -83,9 +107,8 @@ namespace Hydra
                 lives--;
                 if (lives <= 0)
                 {
-                    //game over
-                    lives = 3;
                     lvlState = 0;
+                    lives = 3;
                     LoadNextLevel();
                 }
                 else
@@ -102,6 +125,29 @@ namespace Hydra
             base.Update(gameTime);
         }
 
+        public void GameOver()
+        {
+            MediaPlayer.Stop();
+            
+            soundEffects["gameOver"].Play();
+
+            GraphicsDevice.Clear(Color.Black);
+            SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
+            var center = new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
+            DrawShadowedString(hudFont, "Game Over", center, Color.White);
+            center.Y += 100;
+            DrawShadowedString(hudFont, "Press Spacebar to continue", center, Color.White);
+
+            if (inputHelper.IsNewKeyPress(Keys.Space))
+            {
+                MediaPlayer.Play(gameMusic);
+                
+                lvlState = 0;
+                currentState = State.Running;                
+                LoadNextLevel();
+            }
+        }
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -109,8 +155,10 @@ namespace Hydra
         protected override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin();
+
             level.Draw(gameTime, spriteBatch);
             DrawHud();
+
             spriteBatch.End();
             
             base.Draw(gameTime);
