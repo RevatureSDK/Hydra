@@ -31,11 +31,11 @@
 /processorParam:Quality=Best
 /build:audio/fireHit.wav
 
-#begin audio/gameOver.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
+#begin audio/gameOverMusic.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
 /processorParam:Quality=Best
-/build:audio/gameOver.wav
+/build:audio/gameOverMusic.mp3;audio/gameOver.mp3
 
 #begin audio/jump.wav
 /importer:WavImporter
@@ -236,6 +236,18 @@
 /processorParam:TextureFormat=Color
 /build:hud/HydraHead.png
 
+#begin object/door.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:object/door.png
+
 #begin object/flag.gif
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -247,6 +259,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:object/flag.gif
+
+#begin object/portal.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:object/portal.png
 
 #begin object/star.png
 /importer:TextureImporter

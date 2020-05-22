@@ -126,7 +126,7 @@ namespace Hydra
                     {
                         Velocity.X = 0;
 
-                        if (obj.Texture.Name == "Flag")
+                        if (obj.Texture.Name == "Exit")
                         {
                             reachedExit = true;
                         }
@@ -157,7 +157,7 @@ namespace Hydra
 
                         Velocity.Y = 0;
 
-                        if (obj.Texture.Name == "Flag")
+                        if (obj.Texture.Name == "Exit")
                         {
                             reachedExit = true;
                         }

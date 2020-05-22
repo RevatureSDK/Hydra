@@ -18,19 +18,14 @@ namespace Hydra
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         private Song gameMusic;
+        private Song gameOverMusic;
 
         private Level level;
         private int lvlState = 0;
         private int lives = 3;
-        private State currentState = State.Running;
-        private State previousState = State.Running;
+        private bool gameOver = false;
         private InputHelper inputHelper;
 
-        enum State
-        {
-            Running,
-            GameOver 
-        }
 
         public Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
 
@@ -61,11 +56,11 @@ namespace Hydra
         protected override void LoadContent()
         {
             gameMusic = Content.Load<Song>("audio/breakdown3");
+            gameOverMusic = Content.Load<Song>("audio/gameOver");
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Play(gameMusic);
             SoundEffect.MasterVolume = 0.4f;
             soundEffects.Add("fireball", Content.Load<SoundEffect>("audio/fireHit"));
-            soundEffects.Add("gameOver", Content.Load<SoundEffect>("audio/gameOver"));
             soundEffects.Add("jump", Content.Load<SoundEffect>("audio/jump"));
             spriteBatch = new SpriteBatch(GraphicsDevice);
             LoadNextLevel();
@@ -100,52 +95,51 @@ namespace Hydra
         protected override void Update(GameTime gameTime)
         {
             inputHelper.Update();
-            level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
-
-            if (!level.player.alive)
+            if (!gameOver)
             {
-                lives--;
-                if (lives <= 0)
+                level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
+                if (!level.player.alive)
                 {
-                    lvlState = 0;
-                    lives = 3;
+                    lives--;
+                    if (lives <= 0)
+                    {
+                        lvlState = 0;
+                        lives = 3;
+                        gameOver = true;
+                        MediaPlayer.Play(gameOverMusic);
+                        GraphicsDevice.Clear(Color.Black);
+                    }
+                    else
+                    {
+                        lvlState--;
+                        LoadNextLevel();
+                    }
+                }
+                else if (level.player.reachedExit)
+                {
                     LoadNextLevel();
                 }
-                else
-                {
-                    lvlState--;
-                    LoadNextLevel();
-                }                
             }
-            else if (level.player.reachedExit)
+            else
             {
-                LoadNextLevel();
+                if (inputHelper.IsNewKeyPress(Keys.Space))
+                {
+                    MediaPlayer.Play(gameMusic);
+                    gameOver = false;
+                    LoadNextLevel();
+                }
             }
 
             base.Update(gameTime);
         }
 
-        public void GameOver()
+        public void DrawGameOver()
         {
-            MediaPlayer.Stop();
-            
-            soundEffects["gameOver"].Play();
-
-            GraphicsDevice.Clear(Color.Black);
             SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
             var center = new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
             DrawShadowedString(hudFont, "Game Over", center, Color.White);
             center.Y += 100;
             DrawShadowedString(hudFont, "Press Spacebar to continue", center, Color.White);
-
-            if (inputHelper.IsNewKeyPress(Keys.Space))
-            {
-                MediaPlayer.Play(gameMusic);
-                
-                lvlState = 0;
-                currentState = State.Running;                
-                LoadNextLevel();
-            }
         }
 
         /// <summary>
@@ -156,8 +150,17 @@ namespace Hydra
         {
             spriteBatch.Begin();
 
-            level.Draw(gameTime, spriteBatch);
-            DrawHud();
+            if (!gameOver)
+            {
+                level.Draw(gameTime, spriteBatch);
+                DrawHud();
+            }
+            else
+            {
+                GraphicsDevice.SetRenderTarget(null);
+                GraphicsDevice.Clear(Color.Black);
+                DrawGameOver();
+            }
 
             spriteBatch.End();
             
@@ -168,11 +171,12 @@ namespace Hydra
         {
             SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
             Rectangle titleSafeArea = GraphicsDevice.Viewport.TitleSafeArea;
-            Vector2 hudLocation = new Vector2(titleSafeArea.X + 1000, titleSafeArea.Y + 15);
+            Vector2 hudLocation = new Vector2(1000, 15);
 
             Texture2D textureHead = Content.Load<Texture2D>("hud/HydraHead");
             spriteBatch.Draw(textureHead, new Vector2(950, 15), Color.White);
             DrawShadowedString(hudFont, "x" + lives, hudLocation, Color.Black);
+            DrawShadowedString(hudFont, "Level " + lvlState, new Vector2(100, 15), Color.Black);
         }
 
         private void DrawShadowedString(SpriteFont font, string value, Vector2 position, Color color)

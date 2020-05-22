@@ -121,8 +121,8 @@ namespace Hydra
                     return null;
 
                 case 'X':
-                    textureTile = Content.Load<Texture2D>("object/flag");
-                    textureTile.Name = "Flag";
+                    textureTile = Content.Load<Texture2D>("object/portal");
+                    textureTile.Name = "Exit";
                     return new Tile(textureTile, x, y);
 
                 case 'J':
