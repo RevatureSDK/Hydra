@@ -16,6 +16,7 @@ namespace Hydra
         // Physical structure of the level.
         private List<Tile> tiles = new List<Tile>();
         private List<Object2D> objects;
+        private List<Decal> decals;
         private Background mBackground = new Background();
         public Player player;
         public Fireball fireball;
@@ -71,6 +72,7 @@ namespace Hydra
             mBackground.Position = new Vector2(0, 0);
         }
 
+
         private void LoadTiles(Stream fileStream)
         {
             // Load the level and ensure all of the lines are the same length.
@@ -93,6 +95,7 @@ namespace Hydra
             var Height = lines.Count;
 
             objects = new List<Object2D>();
+            decals = new List<Decal>();
             for (int y = 0; y < Height; y++)
             {
                 for (int x = Width - 1; x >= 0; x--)
@@ -120,8 +123,13 @@ namespace Hydra
                 case '.':
                     return null;
 
-                case 'X':
-                    textureTile = Content.Load<Texture2D>("object/portal");
+                case 'n':
+                    textureTile = Content.Load<Texture2D>("object/portal_top");
+                    textureTile.Name = "Exit";
+                    return new Tile(textureTile, x, y);
+
+                case 'u':
+                    textureTile = Content.Load<Texture2D>("object/portal_bot");
                     textureTile.Name = "Exit";
                     return new Tile(textureTile, x, y);
 
@@ -130,21 +138,13 @@ namespace Hydra
                     textureTile.Name = "Jump";
                     return new Tile(textureTile, x, y);
 
-                case '@':
-                    textureTile = Content.Load<Texture2D>("tile/small_p1");
-                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height - 20);
-
                 case '-':
                     textureTile = Content.Load<Texture2D>("tile/tinyplatform");
                     return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height - 20);
 
-                case '_':
+                case '#':
                     textureTile = Content.Load<Texture2D>("tile/medium_p1_tree");
                     return new Tile(textureTile, x, y, 30, 90, textureTile.Width - 30, textureTile.Height - 95);
-
-                case '=':
-                    textureTile = Content.Load<Texture2D>("tile/longfloor");
-                    return new Tile(textureTile, x, y);
 
                 case '|':
                     textureTile = Content.Load<Texture2D>("tile/longfloormid");
@@ -158,19 +158,35 @@ namespace Hydra
                     textureTile = Content.Load<Texture2D>("tile/longfloorright");
                     return new Tile(textureTile, x, y);
 
-                case '{':
+                case '(':
+                    textureTile = Content.Load<Texture2D>("tile/small_top_left");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height);
+
+                case ')':
+                    textureTile = Content.Load<Texture2D>("tile/small_top_right");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height);
+
+                case '\\':
+                    textureTile = Content.Load<Texture2D>("tile/small_bot_left");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height);
+
+                case '/':
+                    textureTile = Content.Load<Texture2D>("tile/small_bot_right");
+                    return new Tile(textureTile, x, y, 0, 5, textureTile.Width, textureTile.Height);
+
+                case '[':
                     textureTile = Content.Load<Texture2D>("tile/clifftop");
                     return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
 
-                case '}':
+                case ']':
                     textureTile = Content.Load<Texture2D>("tile/clifftopr");
                     return new Tile(textureTile, x, y, 0, 15, textureTile.Width, textureTile.Height - 15);
 
-                case '(':
+                case '{':
                     textureTile = Content.Load<Texture2D>("tile/cliffmid");
                     return new Tile(textureTile, x, y);
 
-                case ')':
+                case '}':
                     textureTile = Content.Load<Texture2D>("tile/cliffmidr");
                     return new Tile(textureTile, x, y);
 
@@ -181,6 +197,11 @@ namespace Hydra
 
                 case 'H':
                     playerPos = new Vector2(x, y);
+                    return null;
+
+                case 'T':
+                    textureTile = Content.Load<Texture2D>("object/tree");
+                    decals.Add(new Decal(textureTile, new Vector2(x-10,y+25)));
                     return null;
 
                 default:
@@ -256,6 +277,11 @@ namespace Hydra
                 {
                     obj.Draw(spriteBatch);
                 }                    
+            }
+
+            foreach(var decal in decals)
+            {
+                decal.Draw(spriteBatch);
             }
 
             player.Draw(spriteBatch);
