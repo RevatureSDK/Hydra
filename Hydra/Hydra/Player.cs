@@ -130,24 +130,13 @@ namespace Hydra
                             MovableObject movableObj = (MovableObject)obj;
                             if (movableObj.CheckCollision(objects))
                             {
-                                this.Velocity.X = 0;
+                                Velocity.X = 0;
                             }
                             else
                             {
-                                Velocity.X = (int)(Velocity.X * .5);                                
+                                Velocity.X = (int)(Velocity.X * .5);
+                                movableObj.Update(Velocity.X, objects);
                             }
-                            //Velocity.X = (int)(Velocity.X * .5);
-                            //movableObj.Velocity = this.Velocity;
-
-                            //if (movableObj.CheckCollision(objects))
-                            //{
-                            //    this.Velocity.X = 0;
-                            //}
-                            //else
-                            //{
-                            //    movableObj.Update(this.Velocity);
-                            //}
-
                         }
                         else
                         {
@@ -212,7 +201,7 @@ namespace Hydra
                 }
             }
 
-            if (floor == false)
+            if (!floor)
             {
                 return floor;
             }
@@ -268,7 +257,7 @@ namespace Hydra
                 }                
             }
 
-            if (hasJumped == true)
+            if (hasJumped)
             {
                 Velocity.Y += 0.5f;
             }

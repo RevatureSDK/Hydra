@@ -10,8 +10,6 @@ namespace Hydra
 {
     class MovableObject : Object2D
     {
-        bool inAir = true;
-
         public MovableObject(Texture2D texture, int positionx, int positiony)
         {
             Texture = texture;
@@ -19,24 +17,16 @@ namespace Hydra
             this.Update();
         }
 
-        public Boolean CheckCollision(List<Object2D> objects)
+        public bool CheckCollision(List<Object2D> objects)
         {
             foreach (var obj in objects)
             {
                 if (obj != null)
                 {
-                    if (Velocity.Y >= 0)
+                    if (!this.IsTouchingBottom(obj))
                     {
-                        if (this.IsTouchingBottom(obj))
-                        {
-                            Velocity.Y = 0;
-                        }
-                        else
-                        {
-                            Velocity.Y += 0.5f;
-                        }
+                        Velocity.X = 0;
                     }
-
 
                     if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
                     (Velocity.X < 0 && this.IsTouchingRight(obj)))
@@ -45,28 +35,18 @@ namespace Hydra
                         return true;
                     }
                 }
-
             }
+
             return false;
         }
 
         public void Update(float velocityx, List<Object2D> objects)
         {
+            this.Update();
             Velocity.X = velocityx;
 
-            CheckCollision(objects);
-
-            //if (inAir == true)
-            //{
-            //    Velocity.Y += 0.5f;
-            //}
-            //else
-            //{
-            //    Velocity.Y = 0;
-            //}
-
             Position += Velocity;
-            this.Update();
+            
         }
     }
 }

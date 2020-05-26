@@ -275,7 +275,7 @@ namespace Hydra
             player.Update(width, height, objects);
             if (movableObj != null)
             {
-                movableObj.Update(player.Velocity.X, objects);
+                //movableObj.Update(objects);
             }
             
         }
