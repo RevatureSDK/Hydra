@@ -14,13 +14,13 @@ namespace Hydra
     class Level : IDisposable
     {
         // Physical structure of the level.
-        private List<Tile> tiles = new List<Tile>();
         private List<Object2D> objects;
         private List<Decal> decals;
         private Background mBackground = new Background();
         public Player player;
         public Fireball fireball;
         public Cerberus cerberus;
+        public MovableObject movableObj;
 
         Vector2 playerPos;
         Vector2 cerberusPos;
@@ -204,6 +204,14 @@ namespace Hydra
                     decals.Add(new Decal(textureTile, new Vector2(x-10,y+25)));
                     return null;
 
+                case '@':
+                    textureTile = Content.Load<Texture2D>("object/box");
+                    textureTile.Name = "Box";
+                    movableObj = new MovableObject(textureTile, x, y);
+                    objects.Add(movableObj);
+                    return null;
+                    
+
                 default:
                     throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at position {1}, {2}.", tileType, x, y));
             }
@@ -265,6 +273,11 @@ namespace Hydra
             }
 
             player.Update(width, height, objects);
+            if (movableObj != null)
+            {
+                movableObj.Update(player.Velocity.X, objects);
+            }
+            
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)

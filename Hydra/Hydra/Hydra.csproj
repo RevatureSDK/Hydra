@@ -65,6 +65,7 @@
     <Compile Include="HydraGame.cs" />
     <Compile Include="InputHelper.cs" />
     <Compile Include="Level.cs" />
+    <Compile Include="MovableObject.cs" />
     <Compile Include="Object2D.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />

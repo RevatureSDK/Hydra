@@ -116,6 +116,7 @@ namespace Hydra
         {
             bool jump = false;
             bool floor = true;
+            
 
             foreach (var obj in objects)
             {
@@ -124,7 +125,35 @@ namespace Hydra
                     if ((Velocity.X > 0 && this.IsTouchingLeft(obj)) ||
                         (Velocity.X < 0 && this.IsTouchingRight(obj)))
                     {
-                        Velocity.X = 0;
+                        if (obj.Texture.Name == "Box")
+                        {
+                            MovableObject movableObj = (MovableObject)obj;
+                            if (movableObj.CheckCollision(objects))
+                            {
+                                this.Velocity.X = 0;
+                            }
+                            else
+                            {
+                                Velocity.X = (int)(Velocity.X * .5);                                
+                            }
+                            //Velocity.X = (int)(Velocity.X * .5);
+                            //movableObj.Velocity = this.Velocity;
+
+                            //if (movableObj.CheckCollision(objects))
+                            //{
+                            //    this.Velocity.X = 0;
+                            //}
+                            //else
+                            //{
+                            //    movableObj.Update(this.Velocity);
+                            //}
+
+                        }
+                        else
+                        {
+                            Velocity.X = 0;
+                        }
+                        
 
                         if (obj.Texture.Name == "Exit")
                         {
