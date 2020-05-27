@@ -19,23 +19,29 @@ namespace Hydra
         SpriteBatch spriteBatch;
         private Song gameMusic;
         private Song gameOverMusic;
-
+        private Texture2D playButton;
+        private Vector2 startButtonPosition;
+        private Vector2 exitButtonPosition;
+        private Texture2D exitButton;
+        private GameState gameState;
+        public enum GameState
+        {
+            Menu,
+            Playing,
+            Paused
+        }
+        private int lvlState;
+        private int lives;
+        private bool gameOver;
         private Level level;
-        private int lvlState = 0;
-        private int lives = 3;
-        private bool gameOver = false;
         private InputHelper inputHelper;
-
-
-        public Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
+        public Dictionary<string, SoundEffect> soundEffects;
 
         public HydraGame()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1200;
             graphics.PreferredBackBufferHeight = 900;
-            inputHelper = new InputHelper();
-            Content.RootDirectory = "Content";
         }
 
         /// <summary>
@@ -46,6 +52,15 @@ namespace Hydra
         /// </summary>
         protected override void Initialize()
         {
+            Content.RootDirectory = "Content";
+            inputHelper = new InputHelper();
+            soundEffects = new Dictionary<string, SoundEffect>();
+            lvlState = 0;
+            lives = 3;
+            startButtonPosition = new Vector2((GraphicsDevice.Viewport.Width / 2) - 300, 100);
+            exitButtonPosition = new Vector2((GraphicsDevice.Viewport.Width / 2) - 300, 500);
+            gameOver = false;
+            gameState = GameState.Menu;
             base.Initialize();
         }
 
@@ -55,21 +70,20 @@ namespace Hydra
         /// </summary>
         protected override void LoadContent()
         {
+            playButton = Content.Load<Texture2D>("ui/PlayButton");
+            exitButton = Content.Load<Texture2D>("ui/ExitButton");
             gameMusic = Content.Load<Song>("audio/breakdown3");
             gameOverMusic = Content.Load<Song>("audio/gameOver");
             MediaPlayer.IsRepeating = true;
-            MediaPlayer.Play(gameMusic);
             SoundEffect.MasterVolume = 0.4f;
             soundEffects.Add("fireball", Content.Load<SoundEffect>("audio/fireHit"));
             soundEffects.Add("jump", Content.Load<SoundEffect>("audio/jump"));
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            LoadNextLevel();
         }
 
         private void LoadNextLevel()
         {
             lvlState++;
-
             // Unloads the content for the current level before loading the next one.
             if (level != null)
                 level.Dispose();
@@ -95,51 +109,61 @@ namespace Hydra
         protected override void Update(GameTime gameTime)
         {
             inputHelper.Update();
-            if (!gameOver)
+
+            if (gameState == GameState.Menu)
             {
-                level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
-                if (!level.player.alive)
+                if (inputHelper.IsKeyDown(Keys.Space))
                 {
-                    lives--;
-                    if (lives <= 0)
+                    gameState = GameState.Playing;
+                    MediaPlayer.Play(gameMusic);
+                    LoadNextLevel();
+                }
+                else if (inputHelper.IsKeyDown(Keys.Escape))
+                {
+                    Exit();
+                }
+            }
+
+            if (gameState == GameState.Playing)
+            {
+                if (gameOver)
+                {
+                    if (inputHelper.IsNewKeyPress(Keys.Space))
                     {
-                        lvlState = 0;
-                        lives = 3;
-                        gameOver = true;
-                        MediaPlayer.Play(gameOverMusic);
-                        GraphicsDevice.Clear(Color.Black);
-                    }
-                    else
-                    {
-                        lvlState--;
+                        MediaPlayer.Play(gameMusic);
+                        gameOver = false;
                         LoadNextLevel();
                     }
                 }
-                else if (level.player.reachedExit)
+                else
                 {
-                    LoadNextLevel();
+                    level.Update(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, gameTime);
+                    if (!level.player.alive)
+                    {
+                        lives--;
+                        if (lives <= 0)
+                        {
+                            lvlState = 0;
+                            lives = 3;
+                            gameOver = true;
+                            MediaPlayer.Play(gameOverMusic);
+                            GraphicsDevice.Clear(Color.Black);
+                        }
+                        else
+                        {
+                            lvlState--;
+                            LoadNextLevel();
+                        }
+                    }
+                    else if (level.player.reachedExit)
+                    {
+                        LoadNextLevel();
+                    }
                 }
             }
-            else
-            {
-                if (inputHelper.IsNewKeyPress(Keys.Space))
-                {
-                    MediaPlayer.Play(gameMusic);
-                    gameOver = false;
-                    LoadNextLevel();
-                }
-            }
+
 
             base.Update(gameTime);
-        }
-
-        public void DrawGameOver()
-        {
-            SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
-            var center = new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
-            DrawShadowedString(hudFont, "Game Over", center, Color.White);
-            center.Y += 100;
-            DrawShadowedString(hudFont, "Press Spacebar to continue", center, Color.White);
         }
 
         /// <summary>
@@ -150,21 +174,40 @@ namespace Hydra
         {
             spriteBatch.Begin();
 
-            if (!gameOver)
+            if (gameState == GameState.Menu)
+             {
+                spriteBatch.Draw(playButton, startButtonPosition, Color.White);
+                spriteBatch.Draw(exitButton, exitButtonPosition, Color.White);
+             }
+
+            else if (gameState == GameState.Playing)
             {
-                level.Draw(gameTime, spriteBatch);
-                DrawHud();
-            }
-            else
-            {
-                GraphicsDevice.SetRenderTarget(null);
-                GraphicsDevice.Clear(Color.Black);
-                DrawGameOver();
+                if (!gameOver)
+                {
+                    level.Draw(gameTime, spriteBatch);
+                    DrawHud();
+                }
+                else
+                {
+                    GraphicsDevice.SetRenderTarget(null);
+                    GraphicsDevice.Clear(Color.Black);
+                    DrawGameOver();
+                }
             }
 
             spriteBatch.End();
             
             base.Draw(gameTime);
+        }
+
+
+        public void DrawGameOver()
+        {
+            SpriteFont hudFont = Content.Load<SpriteFont>("hud/hud");
+            var center = new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
+            DrawShadowedString(hudFont, "Game Over", center, Color.White);
+            center.Y += 100;
+            DrawShadowedString(hudFont, "Press Spacebar to continue", center, Color.White);
         }
 
         private void DrawHud()
